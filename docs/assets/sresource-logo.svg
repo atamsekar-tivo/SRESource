@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#4F46E5" opacity="0.1" stroke="#4F46E5" stroke-width="2"/>
+  
+  <!-- Main icon - represents SRE/DevOps -->
+  <g transform="translate(100, 100)">
+    <!-- Center circle -->
+    <circle cx="0" cy="0" r="35" fill="#4F46E5" stroke="#4F46E5" stroke-width="2"/>
+    
+    <!-- S shape representing SRE -->
+    <path d="M -15 -20 Q -20 -15 -15 -10 Q -10 -5 -15 0 Q -20 5 -15 10 Q -10 15 -15 20" 
+          fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Wrench symbol representing DevOps/Operations -->
+    <g transform="translate(15, 0)">
+      <circle cx="0" cy="0" r="8" fill="white"/>
+      <line x1="8" y1="-8" x2="18" y2="-18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Outer dots representing cloud/distributed systems -->
+    <circle cx="0" cy="-50" r="4" fill="#4F46E5"/>
+    <circle cx="43" cy="-25" r="4" fill="#4F46E5"/>
+    <circle cx="43" cy="25" r="4" fill="#4F46E5"/>
+    <circle cx="0" cy="50" r="4" fill="#4F46E5"/>
+    <circle cx="-43" cy="25" r="4" fill="#4F46E5"/>
+    <circle cx="-43" cy="-25" r="4" fill="#4F46E5"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="16" font-weight="bold" 
+        text-anchor="middle" fill="#4F46E5">SRESource</text>
+</svg>
