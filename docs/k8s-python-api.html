@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Python Client API Reference</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 20px;
+        }
+        
+        nav h3 {
+            margin-bottom: 15px;
+            color: #1976D2;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        nav a {
+            display: block;
+            padding: 10px 15px;
+            background: #f0f0f0;
+            color: #1976D2;
+            text-decoration: none;
+            border-radius: 4px;
+            border-left: 3px solid #2196F3;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid #2196F3;
+        }
+        
+        .section h2 {
+            color: #1976D2;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .subsection {
+            margin-bottom: 25px;
+        }
+        
+        .subsection h3 {
+            color: #2196F3;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .method {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .method-name {
+            font-family: 'Courier New', monospace;
+            color: #2196F3;
+            font-weight: 600;
+            font-size: 1.05em;
+            margin-bottom: 8px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            border-left: 3px solid #00ff00;
+        }
+        
+        /* Apply dark theme to pre/code blocks for Highlight.js */
+        pre {
+            background: #1e1e1e !important;
+            padding: 15px !important;
+            border-radius: 6px !important;
+            overflow-x: auto !important;
+            margin: 15px 0 !important;
+            font-family: 'Courier New', monospace !important;
+            font-size: 0.9em !important;
+            line-height: 1.5 !important;
+            border-left: 3px solid #00ff00 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        pre code {
+            background: transparent !important;
+            padding: 0 !important;
+            color: #d4d4d4 !important;
+            border-radius: 0 !important;
+        }
+        
+        /* Highlight.js color overrides for better visibility */
+        .hljs {
+            background: #1e1e1e !important;
+            color: #d4d4d4 !important;
+        }
+        
+        .hljs-attr {
+            color: #9cdcfe !important;
+        }
+        
+        .hljs-string {
+            color: #ce9178 !important;
+        }
+        
+        .hljs-number {
+            color: #b5cea8 !important;
+        }
+        
+        .hljs-literal {
+            color: #569cd6 !important;
+        }
+        
+        .hljs-name,
+        .hljs-title {
+            color: #dcdcaa !important;
+        }
+        
+        .hljs-built_in {
+            color: #569cd6 !important;
+        }
+        
+        .hljs-keyword {
+            color: #569cd6 !important;
+        }
+        
+        .hljs-function {
+            color: #dcdcaa !important;
+        }
+        
+        .hljs-comment {
+            color: #6a9955 !important;
+        }
+        
+        .code-block span.comment {
+            color: #6a9955;
+        }
+        
+        .code-block span.string {
+            color: #ce9178;
+        }
+        
+        .code-block span.keyword {
+            color: #569cd6;
+        }
+        
+        .parameters {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid #FF9800;
+        }
+        
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        .parameters strong {
+            color: #FF6F00;
+        }
+        
+        .example {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 3px solid #FFC107;
+        }
+        
+        .example strong {
+            color: #856404;
+        }
+        
+        .note {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 3px solid #2196F3;
+            color: #1565c0;
+        }
+        
+        .output {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid #9c27b0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        table {
+                    pre {
+                        padding: 15px !important;
+                        border-radius: 6px !important;
+                        overflow-x: auto !important;
+                        margin: 15px 0 !important;
+                        font-size: 0.9em !important;
+                        line-height: 1.5 !important;
+                        border-left: 3px solid #4CAF50 !important;
+                    }
+        
+                    pre code {
+                        background: none !important;
+                        padding: 0 !important;
+                        border-radius: 0 !important;
+                        color: inherit !important;
+                    }
+        
+                    .hljs {
+                        background: #282c34 !important;
+                        color: #abb2bf !important;
+                    }
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 40px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .badge-required {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .badge-optional {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .back-to-top {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-to-top:hover {
+            background: #1976D2;
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 Kubernetes Python Client API Reference</h1>
+            <p>Quick reference guide for kubernetes-client library with code examples</p>
+        </header>
+        
+        <nav>
+            <h3>📑 API Methods</h3>
+            <ul>
+                <li><a href="#nodes">Nodes</a></li>
+                <li><a href="#pods">Pods</a></li>
+                <li><a href="#deployments">Deployments</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#configmaps">ConfigMaps</a></li>
+                <li><a href="#secrets">Secrets</a></li>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#daemonsets">DaemonSets</a></li>
+                <li><a href="#statefulsets">StatefulSets</a></li>
+                <li><a href="#jobs">Jobs</a></li>
+                <li><a href="#events">Events</a></li>
+                <li><a href="#pvc">PersistentVolumeClaims</a></li>
+            </ul>
+        </nav>
+        
+        <!-- NODES SECTION -->
+        <div class="section" id="nodes">
+            <h2>🖥️ Nodes API</h2>
+            
+            <div class="subsection">
+                <h3>List All Nodes</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_node()</div>
+                    <div class="description">List all nodes in the cluster</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+# Load kubeconfig
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List all nodes
+nodes = v1.list_node()
+for node in nodes.items:
+    print(f&quot;Node: {node.metadata.name}&quot;)
+    print(f&quot;Status: {node.status.conditions[-1].type}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Node Details</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_node(name)</div>
+                    <div class="description">Get detailed information about a specific node</div>
+                    <div class="parameters">
+                        <strong>Parameters:</strong><br>
+                        • <code>name</code>: Node name (required)
+                    </div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# Get specific node
+node = v1.read_node(name=&quot;node-1&quot;)
+print(f&quot;Allocatable CPU: {node.status.allocatable[&#x27;cpu&#x27;]}&quot;)
+print(f&quot;Allocatable Memory: {node.status.allocatable[&#x27;memory&#x27;]}&quot;)
+
+# Check node conditions
+for condition in node.status.conditions:
+    print(f&quot;{condition.type}: {condition.status}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Node Resources</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_node(name).status.allocatable</div>
+                    <div class="description">Check CPU, memory, and storage allocatable on a node</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+node = v1.read_node(name=&quot;worker-1&quot;)
+
+# Get allocatable resources
+allocatable = node.status.allocatable
+print(&quot;Allocatable Resources:&quot;)
+print(f&quot;  CPU: {allocatable[&#x27;cpu&#x27;]}&quot;)
+print(f&quot;  Memory: {allocatable[&#x27;memory&#x27;]}&quot;)
+print(f&quot;  Pods: {allocatable[&#x27;pods&#x27;]}&quot;)
+
+# Get requested resources
+requested = node.status.requested
+print(&quot;Requested Resources:&quot;)
+print(f&quot;  CPU: {requested.get(&#x27;cpu&#x27;, &#x27;N/A&#x27;)}&quot;)
+print(f&quot;  Memory: {requested.get(&#x27;memory&#x27;, &#x27;N/A&#x27;)}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="example">
+                <strong>💡 Example: Monitor Node Health</strong>
+                <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+def check_node_health(node_name):
+    node = v1.read_node(name=node_name)
+    conditions = {c.type: c.status for c in node.status.conditions}
+    
+    if conditions.get(&#x27;Ready&#x27;) == &#x27;True&#x27;:
+        print(f&quot;✓ {node_name} is Ready&quot;)
+    else:
+        print(f&quot;✗ {node_name} is NotReady&quot;)
+    
+    return conditions
+
+# Check all nodes
+nodes = v1.list_node()
+for node in nodes.items:
+    check_node_health(node.metadata.name)
+                </code></pre>
+            </div>
+        </div>
+        
+        <!-- PODS SECTION -->
+        <div class="section" id="pods">
+            <h2>📦 Pods API</h2>
+            
+            <div class="subsection">
+                <h3>List Pods</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_pod(namespace, watch=False)</div>
+                    <div class="description">List all pods in a namespace</div>
+                    <div class="parameters">
+                        <strong>Parameters:</strong><br>
+                        • <code>namespace</code>: Namespace name (required)<br>
+                        • <code>watch</code>: Watch for changes (optional, default: False)<br>
+                        • <code>label_selector</code>: Filter by labels (optional)
+                    </div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List all pods in default namespace
+pods = v1.list_namespaced_pod(namespace=&quot;default&quot;)
+for pod in pods.items:
+    print(f&quot;Pod: {pod.metadata.name}&quot;)
+    print(f&quot;Status: {pod.status.phase}&quot;)
+    print(f&quot;Node: {pod.spec.node_name}&quot;)
+
+# List pods with label selector
+selector = &quot;app=nginx&quot;
+pods = v1.list_namespaced_pod(namespace=&quot;default&quot;, label_selector=selector)
+print(f&quot;Found {len(pods.items)} nginx pods&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Pod Details</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_namespaced_pod(name, namespace)</div>
+                    <div class="description">Get detailed information about a specific pod</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+pod = v1.read_namespaced_pod(name=&quot;my-pod&quot;, namespace=&quot;default&quot;)
+
+# Pod information
+print(f&quot;Name: {pod.metadata.name}&quot;)
+print(f&quot;Status: {pod.status.phase}&quot;)
+print(f&quot;IP: {pod.status.pod_ip}&quot;)
+print(f&quot;Node: {pod.spec.node_name}&quot;)
+
+# Container information
+for container in pod.spec.containers:
+    print(f&quot;Container: {container.name}&quot;)
+    print(f&quot;Image: {container.image}&quot;)
+
+# Container status
+for status in pod.status.container_statuses:
+    print(f&quot;Container: {status.name} - Ready: {status.ready}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Pod Logs</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_namespaced_pod_log(name, namespace, container=None)</div>
+                    <div class="description">Retrieve logs from a pod</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# Get pod logs
+try:
+    logs = v1.read_namespaced_pod_log(
+        name=&quot;my-pod&quot;,
+        namespace=&quot;default&quot;,
+        container=&quot;my-container&quot;,
+        tail_lines=100
+    )
+    print(logs)
+except Exception as e:
+    print(f&quot;Error: {e}&quot;)
+
+# Get previous logs (if pod restarted)
+logs = v1.read_namespaced_pod_log(
+    name=&quot;my-pod&quot;,
+    namespace=&quot;default&quot;,
+    previous=True
+)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="example">
+                <strong>💡 Example: Debug Pod Status</strong>
+                <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+def debug_pod(pod_name, namespace):
+    pod = v1.read_namespaced_pod(name=pod_name, namespace=namespace)
+    
+    print(f&quot;Pod Status: {pod.status.phase}&quot;)
+    
+    if pod.status.phase != &quot;Running&quot;:
+        # Get events
+        events = v1.list_namespaced_event(namespace=namespace)
+        for event in events.items:
+            if event.involved_object.name == pod_name:
+                print(f&quot;Event: {event.reason} - {event.message}&quot;)
+    
+    # Check container status
+    for status in pod.status.container_statuses or []:
+        print(f&quot;Container: {status.name}&quot;)
+        print(f&quot;  Ready: {status.ready}&quot;)
+        print(f&quot;  Restarts: {status.restart_count}&quot;)
+        if status.last_state and status.last_state.terminated:
+            print(f&quot;  Exit Code: {status.last_state.terminated.exit_code}&quot;)
+
+debug_pod(&quot;my-pod&quot;, &quot;default&quot;)
+                </code></pre>
+            </div>
+        </div>
+        
+        <!-- DEPLOYMENTS SECTION -->
+        <div class="section" id="deployments">
+            <h2>🚀 Deployments API</h2>
+            
+            <div class="subsection">
+                <h3>List Deployments</h3>
+                <div class="method">
+                    <div class="method-name">apps_v1.list_namespaced_deployment(namespace)</div>
+                    <div class="description">List all deployments in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+apps_v1 = client.AppsV1Api()
+
+# List all deployments
+deployments = apps_v1.list_namespaced_deployment(namespace=&quot;default&quot;)
+for deploy in deployments.items:
+    print(f&quot;Deployment: {deploy.metadata.name}&quot;)
+    print(f&quot;Replicas: {deploy.spec.replicas}&quot;)
+    print(f&quot;Ready: {deploy.status.ready_replicas}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Deployment Details</h3>
+                <div class="method">
+                    <div class="method-name">apps_v1.read_namespaced_deployment(name, namespace)</div>
+                    <div class="description">Get detailed information about a deployment</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+apps_v1 = client.AppsV1Api()
+
+deploy = apps_v1.read_namespaced_deployment(name=&quot;my-app&quot;, namespace=&quot;default&quot;)
+
+print(f&quot;Deployment: {deploy.metadata.name}&quot;)
+print(f&quot;Desired Replicas: {deploy.spec.replicas}&quot;)
+print(f&quot;Ready Replicas: {deploy.status.ready_replicas}&quot;)
+print(f&quot;Available Replicas: {deploy.status.available_replicas}&quot;)
+print(f&quot;Updated Replicas: {deploy.status.updated_replicas}&quot;)
+
+# Check deployment conditions
+for condition in deploy.status.conditions or []:
+    print(f&quot;{condition.type}: {condition.status}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Scale Deployment</h3>
+                <div class="method">
+                    <div class="method-name">apps_v1.patch_namespaced_deployment_scale(name, namespace, body)</div>
+                    <div class="description">Scale a deployment to desired replicas</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+apps_v1 = client.AppsV1Api()
+
+# Scale deployment to 5 replicas
+body = {
+    &quot;spec&quot;: {
+        &quot;replicas&quot;: 5
+    }
+}
+
+result = apps_v1.patch_namespaced_deployment_scale(
+    name=&quot;my-app&quot;,
+    namespace=&quot;default&quot;,
+    body=body
+)
+print(f&quot;Scaled to {result.spec.replicas} replicas&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SERVICES SECTION -->
+        <div class="section" id="services">
+            <h2>🌐 Services API</h2>
+            
+            <div class="subsection">
+                <h3>List Services</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_service(namespace)</div>
+                    <div class="description">List all services in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List all services
+services = v1.list_namespaced_service(namespace=&quot;default&quot;)
+for svc in services.items:
+    print(f&quot;Service: {svc.metadata.name}&quot;)
+    print(f&quot;Type: {svc.spec.type}&quot;)
+    print(f&quot;Cluster IP: {svc.spec.cluster_ip}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Service Details</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_namespaced_service(name, namespace)</div>
+                    <div class="description">Get detailed information about a service</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+svc = v1.read_namespaced_service(name=&quot;my-service&quot;, namespace=&quot;default&quot;)
+
+print(f&quot;Service: {svc.metadata.name}&quot;)
+print(f&quot;Type: {svc.spec.type}&quot;)
+print(f&quot;Cluster IP: {svc.spec.cluster_ip}&quot;)
+
+# Get endpoints
+if svc.status.load_balancer and svc.status.load_balancer.ingress:
+    for ingress in svc.status.load_balancer.ingress:
+        print(f&quot;External IP: {ingress.ip or ingress.hostname}&quot;)
+
+# Get ports
+for port in svc.spec.ports:
+    print(f&quot;Port: {port.name} - {port.port}:{port.target_port}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CONFIGMAPS SECTION -->
+        <div class="section" id="configmaps">
+            <h2>⚙️ ConfigMaps API</h2>
+            
+            <div class="subsection">
+                <h3>List ConfigMaps</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_config_map(namespace)</div>
+                    <div class="description">List all ConfigMaps in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List all ConfigMaps
+cms = v1.list_namespaced_config_map(namespace=&quot;default&quot;)
+for cm in cms.items:
+    print(f&quot;ConfigMap: {cm.metadata.name}&quot;)
+    print(f&quot;Keys: {list(cm.data.keys()) if cm.data else []}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Read ConfigMap</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_namespaced_config_map(name, namespace)</div>
+                    <div class="description">Get ConfigMap contents</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+cm = v1.read_namespaced_config_map(name=&quot;app-config&quot;, namespace=&quot;default&quot;)
+
+# Get all data
+for key, value in (cm.data or {}).items():
+    print(f&quot;{key}: {value}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECRETS SECTION -->
+        <div class="section" id="secrets">
+            <h2>🔐 Secrets API</h2>
+            
+            <div class="subsection">
+                <h3>List Secrets</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_secret(namespace)</div>
+                    <div class="description">List all secrets in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+import base64
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List all secrets
+secrets = v1.list_namespaced_secret(namespace=&quot;default&quot;)
+for secret in secrets.items:
+    print(f&quot;Secret: {secret.metadata.name}&quot;)
+    print(f&quot;Type: {secret.type}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Read Secret</h3>
+                <div class="method">
+                    <div class="method-name">v1.read_namespaced_secret(name, namespace)</div>
+                    <div class="description">Get secret data (base64 encoded)</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+import base64
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+secret = v1.read_namespaced_secret(name=&quot;my-secret&quot;, namespace=&quot;default&quot;)
+
+# Decode secret data
+for key, encoded_value in (secret.data or {}).items():
+    decoded_value = base64.b64decode(encoded_value).decode(&#x27;utf-8&#x27;)
+    print(f&quot;{key}: {decoded_value}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- NAMESPACES SECTION -->
+        <div class="section" id="namespaces">
+            <h2>📂 Namespaces API</h2>
+            
+            <div class="subsection">
+                <h3>List Namespaces</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespace()</div>
+                    <div class="description">List all namespaces in the cluster</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List all namespaces
+namespaces = v1.list_namespace()
+for ns in namespaces.items:
+    print(f&quot;Namespace: {ns.metadata.name}&quot;)
+    print(f&quot;Status: {ns.status.phase}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Create Namespace</h3>
+                <div class="method">
+                    <div class="method-name">v1.create_namespace(body)</div>
+                    <div class="description">Create a new namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+body = client.V1Namespace(
+    metadata=client.V1ObjectMeta(name=&quot;my-namespace&quot;)
+)
+
+try:
+    v1.create_namespace(body)
+    print(&quot;Namespace created&quot;)
+except client.rest.ApiException as e:
+    print(f&quot;Error: {e}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DAEMONSETS SECTION -->
+        <div class="section" id="daemonsets">
+            <h2>🔁 DaemonSets API</h2>
+            
+            <div class="subsection">
+                <h3>List DaemonSets</h3>
+                <div class="method">
+                    <div class="method-name">apps_v1.list_namespaced_daemon_set(namespace)</div>
+                    <div class="description">List all DaemonSets in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+apps_v1 = client.AppsV1Api()
+
+daemonsets = apps_v1.list_namespaced_daemon_set(namespace=&quot;default&quot;)
+for ds in daemonsets.items:
+    print(f&quot;DaemonSet: {ds.metadata.name}&quot;)
+    print(f&quot;Desired: {ds.status.desired_number_scheduled}&quot;)
+    print(f&quot;Ready: {ds.status.number_ready}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- STATEFULSETS SECTION -->
+        <div class="section" id="statefulsets">
+            <h2>📊 StatefulSets API</h2>
+            
+            <div class="subsection">
+                <h3>List StatefulSets</h3>
+                <div class="method">
+                    <div class="method-name">apps_v1.list_namespaced_stateful_set(namespace)</div>
+                    <div class="description">List all StatefulSets in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+apps_v1 = client.AppsV1Api()
+
+statefulsets = apps_v1.list_namespaced_stateful_set(namespace=&quot;default&quot;)
+for ss in statefulsets.items:
+    print(f&quot;StatefulSet: {ss.metadata.name}&quot;)
+    print(f&quot;Replicas: {ss.spec.replicas}&quot;)
+    print(f&quot;Ready: {ss.status.ready_replicas}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- JOBS SECTION -->
+        <div class="section" id="jobs">
+            <h2>⚡ Jobs API</h2>
+            
+            <div class="subsection">
+                <h3>List Jobs</h3>
+                <div class="method">
+                    <div class="method-name">batch_v1.list_namespaced_job(namespace)</div>
+                    <div class="description">List all jobs in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+batch_v1 = client.BatchV1Api()
+
+jobs = batch_v1.list_namespaced_job(namespace=&quot;default&quot;)
+for job in jobs.items:
+    print(f&quot;Job: {job.metadata.name}&quot;)
+    print(f&quot;Status: {job.status.active or job.status.succeeded or job.status.failed}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Job Status</h3>
+                <div class="method">
+                    <div class="method-name">batch_v1.read_namespaced_job_status(name, namespace)</div>
+                    <div class="description">Get detailed job status</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+batch_v1 = client.BatchV1Api()
+
+job = batch_v1.read_namespaced_job(name=&quot;my-job&quot;, namespace=&quot;default&quot;)
+
+print(f&quot;Job: {job.metadata.name}&quot;)
+print(f&quot;Active: {job.status.active}&quot;)
+print(f&quot;Succeeded: {job.status.succeeded}&quot;)
+print(f&quot;Failed: {job.status.failed}&quot;)
+
+# Check conditions
+for condition in job.status.conditions or []:
+    print(f&quot;{condition.type}: {condition.status}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- EVENTS SECTION -->
+        <div class="section" id="events">
+            <h2>📰 Events API</h2>
+            
+            <div class="subsection">
+                <h3>List Events</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_event(namespace)</div>
+                    <div class="description">List all events in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# List recent events
+events = v1.list_namespaced_event(namespace=&quot;default&quot;)
+for event in events.items:
+    print(f&quot;{event.timestamp}: {event.reason}&quot;)
+    print(f&quot;  Type: {event.involved_object.name}&quot;)
+    print(f&quot;  Message: {event.message}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>Get Pod Events</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_event(namespace, field_selector)</div>
+                    <div class="description">Get events for a specific pod</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+# Get events for specific pod
+field_selector = &quot;involvedObject.name=my-pod&quot;
+events = v1.list_namespaced_event(
+    namespace=&quot;default&quot;,
+    field_selector=field_selector
+)
+
+for event in events.items:
+    print(f&quot;{event.reason}: {event.message}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PVC SECTION -->
+        <div class="section" id="pvc">
+            <h2>💾 PersistentVolumeClaims API</h2>
+            
+            <div class="subsection">
+                <h3>List PVCs</h3>
+                <div class="method">
+                    <div class="method-name">v1.list_namespaced_persistent_volume_claim(namespace)</div>
+                    <div class="description">List all PVCs in a namespace</div>
+                    <pre><code class="language-python">from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+
+pvcs = v1.list_namespaced_persistent_volume_claim(namespace=&quot;default&quot;)
+for pvc in pvcs.items:
+    print(f&quot;PVC: {pvc.metadata.name}&quot;)
+    print(f&quot;Status: {pvc.status.phase}&quot;)
+    print(f&quot;Storage: {pvc.spec.resources.requests[&#x27;storage&#x27;]}&quot;)
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- QUICK REFERENCE TABLE -->
+        <div class="section">
+            <h2>📋 Quick Reference Table</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Resource Type</th>
+                        <th>API Object</th>
+                        <th>List Method</th>
+                        <th>Read Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nodes</td>
+                        <td>CoreV1Api</td>
+                        <td>list_node()</td>
+                        <td>read_node(name)</td>
+                    </tr>
+                    <tr>
+                        <td>Pods</td>
+                        <td>CoreV1Api</td>
+                        <td>list_namespaced_pod()</td>
+                        <td>read_namespaced_pod()</td>
+                    </tr>
+                    <tr>
+                        <td>Deployments</td>
+                        <td>AppsV1Api</td>
+                        <td>list_namespaced_deployment()</td>
+                        <td>read_namespaced_deployment()</td>
+                    </tr>
+                    <tr>
+                        <td>Services</td>
+                        <td>CoreV1Api</td>
+                        <td>list_namespaced_service()</td>
+                        <td>read_namespaced_service()</td>
+                    </tr>
+                    <tr>
+                        <td>StatefulSets</td>
+                        <td>AppsV1Api</td>
+                        <td>list_namespaced_stateful_set()</td>
+                        <td>read_namespaced_stateful_set()</td>
+                    </tr>
+                    <tr>
+                        <td>DaemonSets</td>
+                        <td>AppsV1Api</td>
+                        <td>list_namespaced_daemon_set()</td>
+                        <td>read_namespaced_daemon_set()</td>
+                    </tr>
+                    <tr>
+                        <td>Jobs</td>
+                        <td>BatchV1Api</td>
+                        <td>list_namespaced_job()</td>
+                        <td>read_namespaced_job()</td>
+                    </tr>
+                    <tr>
+                        <td>ConfigMaps</td>
+                        <td>CoreV1Api</td>
+                        <td>list_namespaced_config_map()</td>
+                        <td>read_namespaced_config_map()</td>
+                    </tr>
+                    <tr>
+                        <td>Secrets</td>
+                        <td>CoreV1Api</td>
+                        <td>list_namespaced_secret()</td>
+                        <td>read_namespaced_secret()</td>
+                    </tr>
+                    <tr>
+                        <td>Events</td>
+                        <td>CoreV1Api</td>
+                        <td>list_namespaced_event()</td>
+                        <td>read_namespaced_event()</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <footer>
+            <p>&copy; 2024-2026 SRESource - Kubernetes Python Client API Reference</p>
+            <p>For more information, visit <a href="https://github.com/kubernetes-client/python">kubernetes-client/python</a></p>
+        </footer>
+    </div>
+    <script>
+        // Initialize Highlight.js
+        hljs.highlightAll();
+    </script>
+</body>
+</html>

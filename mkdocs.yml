@@ -8,21 +8,22 @@ edit_uri: edit/main/docs/
 nav:
   - Home: index.md
   - Getting Started: FORMATTING_GUIDE.md
+  - Kubernetes Python API: k8s-python-api.html
   - Kubernetes:
-      - Kubernetes Debugging: kubernetes-debugging-commands.md
-      - EKS Production Guide: production-debugging-eks.md
+      - Kubernetes Debugging: kubernetes-debugging-commands.html
+      - EKS Production Guide: production-debugging-eks.html
   - Operating Systems:
-      - Unix/Linux Debugging: production-debugging-unix-linux.md
+      - Unix/Linux Debugging: production-debugging-unix-linux.html
   - Networking:
-      - Network Debugging: production-networking-debugging.md
+      - Network Debugging: production-networking-debugging.html
   - CI/CD:
-      - CI/CD Tools & Platforms: production-debugging-ci-cd-tools.md
+      - CI/CD Tools & Platforms: production-debugging-ci-cd-tools.html
   - Cloud & Infrastructure:
-      - IAM & Access Control: production-debugging-iam.md
+      - IAM & Access Control: production-debugging-iam.html
   - Databases:
-      - MySQL & PostgreSQL: production-debugging-databases.md
+      - MySQL & PostgreSQL: production-debugging-databases.html
   - Tools & Resources:
-      - Essential Tools Guide: TOOLS_GUIDE.md
+      - Essential Tools Guide: TOOLS_GUIDE.html
 
 theme:
   name: material

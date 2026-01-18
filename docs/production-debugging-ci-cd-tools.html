@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        nav {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        nav h2 {
+            font-size: 1em;
+            color: #1976D2;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        
+        nav ul {
+            list-style: none;
+        }
+        
+        nav li {
+            margin-bottom: 5px;
+        }
+        
+        nav a {
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 0.9em;
+            display: block;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+        
+        main {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        h1 {
+            color: #1976D2;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2196F3;
+        }
+        
+        h2 {
+            color: #1976D2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #2196F3;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+        
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 3px solid #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            background: transparent;
+            color: #00ff00;
+            padding: 0;
+            border-radius: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: #2196F3;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        blockquote {
+            border-left: 4px solid #2196F3;
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #666;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #1976D2;
+        }
+        
+        .toc {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .toc ul {
+            margin-left: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            nav {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <h2>Contents</h2>
+            <ul><li><a href="#jenkins-production-debugging">Jenkins Production Debugging</a></li>
+<li><a href="#github-actions-production-debugging">GitHub Actions Production</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-github-actions-workflow-failures">Scenario:</a></li>
+<li><a href="#argocd-production-debugging">ArgoCD Production Debugging</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-argocd-application-sync-failures">Scenario:</a></li>
+<li><a href="#gitlab-cicd-production-debugging">GitLab CI/CD Production</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-gitlab-ci-pipeline-failures">Scenario:</a></li>
+<li><a href="#spinnaker-production-debugging">Spinnaker Production</a></li>
+<li><a href="#recommended-additional-cicd-tools-and-debugging">Recommended</a></li>
+<li style="margin-left: 20px;"><a href="#gitops-and-deployment-tools">GitOps and Deployment Tools</a></li>
+<li style="margin-left: 20px;"><a href="#test-and-build-automation">Test and Build Automation</a></li>
+<li><a href="#critical-cicd-debugging-principles">Critical CI/CD Debugging</a></li>
+<li style="margin-left: 20px;"><a href="#investigation-methodology">Investigation Methodology</a></li>
+<li style="margin-left: 20px;"><a href="#common-failure-patterns">Common Failure Patterns</a></li>
+<li style="margin-left: 20px;"><a href="#pre-production-debugging-checklist">Pre-Production Debugging</a></li>
+<li style="margin-left: 20px;"><a href="#tools-and-commands-quick-reference">Tools and Commands Quick</a></li>
+<li style="margin-left: 20px;"><a href="#dangerous-cicd-commands">Dangerous CI/CD Commands</a></li>
+<li style="margin-left: 20px;"><a href="#documentation-references">Documentation References</a></li></ul>
+        </nav>
+        <main>
+            <h1 id="production-debugging-commands-for-cicd-tools">Production
+Debugging Commands for CI/CD Tools</h1>
+<blockquote>
+<p><strong>Critical Context</strong>: CI/CD debugging often reveals
+secrets, credentials, and sensitive build artifacts. Always audit logs
+before sharing. Use read-only mode initially. Never modify pipelines
+during active builds. Document all changes with audit trail.</p>
+</blockquote>
+<hr />
+<h2 id="jenkins-production-debugging">Jenkins Production Debugging</h2>
+<h3
+id="scenario-diagnosing-jenkins-build-failures-and-agent-issues">Scenario:
+Diagnosing Jenkins Build Failures and Agent Issues</h3>
+<p><strong>Prerequisites</strong>: Builds failing, jobs not running,
+agents unreachable<br />
+<strong>Common Causes</strong>: Agent connection lost, workspace full,
+executor limit hit, plugin conflict</p>
+<h4 id="getting-jenkins-system-status">Getting Jenkins System
+Status</h4>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check Jenkins service status</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> status jenkins</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart jenkins  <span class="co"># If needed</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Access Jenkins logs</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> /var/log/jenkins/jenkins.log</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For Docker: docker logs -f jenkins-container</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Monitor Jenkins JVM memory</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">jcmd</span> <span class="va">$(</span><span class="ex">pgrep</span> <span class="at">-f</span> jenkins.jar<span class="va">)</span> GC.heap_info</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Heap usage and configuration</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check Jenkins disk space</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">du</span> <span class="at">-sh</span> /var/lib/jenkins</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">du</span> <span class="at">-sh</span> /var/lib/jenkins/jobs</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">du</span> <span class="at">-sh</span> /var/lib/jenkins/workspace</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Verify agent connectivity</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Via Jenkins UI: Manage Jenkins &gt; Manage Nodes</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Via CLI:</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-jar</span> jenkins-cli.jar <span class="at">-s</span> http://localhost:8080 list-nodes</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-jar</span> jenkins-cli.jar <span class="at">-s</span> http://localhost:8080 online-nodes</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check executor availability</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.busyExecutors, .totalExecutors&#39;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Active jobs / total executors</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Check for stuck builds</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.jobs[] | select(.lastBuild | .result == null)&#39;</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Running/stuck jobs (null result)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Monitor build queue</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/queue/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.items[] | {name, why}&#39;</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Queued jobs and reason for queue</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Check plugin load errors</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.plugins[] | select(.active == false)&#39;</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Inactive/broken plugins</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Verify Jenkins connectivity to SCM</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Via UI: Configure System &gt; Source Code Management test</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Via CLI: test git/svn connectivity from Jenkins user</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Check webhook delivery status</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="co"># GitHub/GitLab: Check webhook delivery logs in platform UI</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Jenkins: Monitor: Manage Jenkins &gt; System Log</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Monitor Jenkins thread count</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-eLf</span> <span class="kw">|</span> <span class="fu">grep</span> jenkins <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare with: ps aux | grep jenkins | wc -l (main process count)</span></span></code></pre></div>
+<h4 id="jenkins-build-and-job-diagnostics">Jenkins Build and Job
+Diagnostics</h4>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get specific job build history</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/job/<span class="op">&lt;</span>job-name<span class="op">&gt;</span>/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.builds[] | {number, result, duration}&#39;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get last failed build logs</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/job/<span class="op">&lt;</span>job-name<span class="op">&gt;</span>/<span class="op">&lt;</span>build-number<span class="op">&gt;</span>/consoleText <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-100</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check job configuration</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/job/<span class="op">&lt;</span>job-name<span class="op">&gt;</span>/config.xml <span class="kw">|</span> <span class="fu">head</span> <span class="at">-50</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor build resource usage</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Inside build: measure via: top -b -n 1, df -h, free -h</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if build aborted due to timeout</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;timeout\|kill\|abort&quot;</span> /var/lib/jenkins/jobs/<span class="op">&lt;</span>job<span class="op">&gt;</span>/builds/<span class="op">&lt;</span>build<span class="op">&gt;</span>/log</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify build artifact storage</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">du</span> <span class="at">-sh</span> /var/lib/jenkins/jobs/<span class="op">&lt;</span>job<span class="op">&gt;</span>/builds/<span class="op">&lt;</span>build<span class="op">&gt;</span>/archive</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Check build workspace cleanliness</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> /var/lib/jenkins/workspace/<span class="op">&lt;</span>job<span class="op">&gt;</span>/</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Look for: Stale files, permission issues</span></span></code></pre></div>
+<h4 id="jenkins-master-and-agent-connection-recovery">Jenkins Master and
+Agent Connection Recovery</h4>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Restart agent gracefully</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Via Jenkins UI: Node &gt; Mark offline &gt; Disconnect &gt; Reconnect</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Via CLI:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-jar</span> jenkins-cli.jar <span class="at">-s</span> http://localhost:8080 <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  offline-node <span class="op">&lt;</span>agent-name<span class="op">&gt;</span> -m <span class="st">&quot;Manual restart&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-jar</span> jenkins-cli.jar <span class="at">-s</span> http://localhost:8080 <span class="dt">\</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  online-node <span class="op">&lt;</span>agent-name<span class="op">&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test agent connection</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># On agent:</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">java</span> <span class="at">-jar</span> agent.jar <span class="at">-jnlpUrl</span> http://<span class="op">&lt;</span>jenkins-master<span class="op">&gt;</span>:8080/computer/<span class="op">&lt;</span>agent<span class="op">&gt;</span>/slave-agent.jnlp</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Check agent logs</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> /var/log/jenkins-agent/agent.log  <span class="co"># Or wherever running</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Clear agent workspace if corrupted</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> /var/lib/jenkins/workspace/<span class="op">&lt;</span>job-name<span class="op">&gt;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Agent will recreate on next build</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify agent JVM parameters</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;java.*agent.jar&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> grep</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: Xmx (max memory), port bindings</span></span></code></pre></div>
+<h4 id="jenkins-configuration-and-plugin-management">Jenkins
+Configuration and Plugin Management</h4>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List installed plugins and versions</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/pluginManager/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.plugins[] | {name, version, active}&#39;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for plugin dependency issues</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Jenkins UI: Manage Jenkins &gt; Plugin Manager &gt; Updates</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Backup Jenkins configuration</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-czf</span> jenkins-backup-<span class="va">$(</span><span class="fu">date</span> +%Y%m%d<span class="va">)</span>.tar.gz /var/lib/jenkins/</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Reload Jenkins configuration from disk</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/reload</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Jenkins system properties</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.systemProperties&#39;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor Jenkins performance metrics</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/metrics/key-metrics/ <span class="kw">|</span> <span class="ex">jq</span> .</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires Metrics plugin</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Get Jenkins version</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.version&#39;</span></span></code></pre></div>
+<h4 id="commands-to-never-use-in-production">Commands to NEVER use in
+production</h4>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: pkill -9 java (kill Jenkins forcefully)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    Use: systemctl stop jenkins</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: rm -rf /var/lib/jenkins/jobs (delete all jobs)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#    No recovery possible; loss of CI/CD infrastructure</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Modify Jenkins XML configs while daemon running</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    Corruption; use Jenkins UI or reload after changes</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Scale down agents while builds running</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    Aborts active jobs; incomplete artifacts</span></span></code></pre></div>
+<hr />
+<h2 id="github-actions-production-debugging">GitHub Actions Production
+Debugging</h2>
+<h3 id="scenario-diagnosing-github-actions-workflow-failures">Scenario:
+Diagnosing GitHub Actions Workflow Failures</h3>
+<p><strong>Prerequisites</strong>: Workflows not triggering, jobs timing
+out, runners unreachable<br />
+<strong>Common Causes</strong>: Trigger condition mismatch, self-hosted
+runner down, secrets misconfigured, API rate limiting</p>
+<h4 id="github-actions-workflow-status-and-logs">GitHub Actions Workflow
+Status and Logs</h4>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check workflow runs via GitHub API</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/runs <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.workflow_runs[] | {name, status, conclusion, created_at}&#39;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Get detailed run information</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/runs/<span class="op">&lt;</span>run_id<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.&#39;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: List workflow files in repository</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/workflows <span class="dt">\</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.workflows[] | {name, path, state}&#39;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check if workflow is disabled</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Via UI: Actions &gt; select workflow &gt; check if enabled</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API: state field should be &quot;active&quot;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Verify trigger events are correct</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Check .github/workflows/&lt;workflow&gt;.yml:</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> .github/workflows/<span class="op">&lt;</span>workflow<span class="op">&gt;</span>.yml <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-A</span> 5 <span class="st">&quot;^on:&quot;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check for branch protection rule blocking</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co"># UI: Settings &gt; Branches &gt; check required status checks</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co"># May prevent merge if workflow required but failing</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Monitor job execution logs</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Via UI: Actions &gt; select run &gt; select job &gt; see logs</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API: get job logs from run details</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Check for secrets in logs (security concern)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Search logs: grep -i &quot;secret\|password\|token&quot; &lt;log-file&gt;</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co"># If found, rotate credentials immediately</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Verify runner availability</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Via UI: Settings &gt; Actions &gt; Runners</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Online/offline status, assigned jobs</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Check webhook delivery status</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="co"># UI: Settings &gt; Webhooks &gt; Recent Deliveries</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Trigger events and delivery status</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Monitor action usage</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/cache/usage <span class="dt">\</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.&#39;</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Cache size and limits</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Check for rate limiting</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/rate_limit <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.rate_limit&#39;</span></span></code></pre></div>
+<h4 id="github-actions-self-hosted-runner-diagnostics">GitHub Actions
+Self-Hosted Runner Diagnostics</h4>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check runner status</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Runner machine: ps aux | grep -E &quot;runner.*.sh|Runner.Listener&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Runner process running</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Monitor runner logs</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Location: ~/actions-runner/_diag/</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> ~/actions-runner/_diag/ <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-10</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> ~/actions-runner/_diag/Runner_<span class="pp">*</span>.log</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Test runner connectivity to GitHub</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># On runner:</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> https://api.github.com</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return 200</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Verify runner registration token not expired</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Token expires after 1 hour if registration incomplete</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co"># UI: Settings &gt; Actions &gt; Runners &gt; Add runner (get new token)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Check runner labels match workflow requirements</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Workflow: runs-on: [self-hosted, linux, x64]</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Runner registration: must include matching labels</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Monitor runner disk space</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-h</span> /home/runner  <span class="co"># Or wherever runner is installed</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Builds may fail if &lt; 5GB free</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Monitor runner memory during builds</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co"># While build running: free -h &amp;&amp; ps aux | grep -i java/docker</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Check runner network connectivity</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Test GitHub: timeout 5 curl https://github.com</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Test artifact server: timeout 5 curl https://&lt;artifact-server&gt;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Verify runner can execute actions</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Docker installation (if Docker actions used):</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> ps  <span class="co"># Must work without sudo</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Python/Node (if scripted actions):</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">--version</span> <span class="kw">&amp;&amp;</span> <span class="ex">node</span> <span class="at">--version</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Test concurrent job capacity</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Runner config: concurrent value in .runner config</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: watch -n 1 &#39;ps aux | grep -c runner&#39;</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Monitor system load during jobs</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="co"># While build: uptime &amp;&amp; top -b -n 1 | head -5</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Check runner configuration file</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/actions-runner/.runner</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Location usually:</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Linux: /home/&lt;user&gt;/actions-runner/</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="co"># macOS: /Users/&lt;user&gt;/actions-runner/</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Windows: C:\actions-runner\</span></span></code></pre></div>
+<h4 id="github-actions-secrets-and-credentials-management">GitHub
+Actions Secrets and Credentials Management</h4>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Verify secrets are defined at correct level</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Repository secrets: Settings &gt; Secrets</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Organization secrets: Settings &gt; Secrets (org level)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Environment secrets: Settings &gt; Environments &gt; select &gt; Secrets</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Check secret usage in workflows</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;secrets\.&quot;</span> .github/workflows/</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Which secrets referenced in workflows</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Verify masked secrets in logs</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># GitHub automatically masks known secrets</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Check logs for: *** (indicates masked value)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Monitor secret rotation</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Regularly rotate: Settings &gt; Secrets &gt; Update</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Test secret availability in job context</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Add to workflow: run: echo &quot;Test: ${{ secrets.MY_SECRET }}&quot;</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Should output: Test: ***</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check for hardcoded secrets</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;password\|token\|secret&quot;</span> .github/workflows/ <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;secrets\.&quot;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># May indicate leaked credential</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Verify environment-specific secrets</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co"># For prod: use Environment protection rules</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co"># UI: Settings &gt; Environments &gt; select &gt; Deployment protection rules</span></span></code></pre></div>
+<h4 id="github-actions-api-rate-limiting-and-performance">GitHub Actions
+API Rate Limiting and Performance</h4>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check API rate limits</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/rate_limit <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.resources&#39;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Remaining requests and reset time</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor workflow runs in bulk</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;https://api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;/actions/runs?status=queued&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.total_count&#39;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Number of queued runs</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Get performance metrics per workflow</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/runs <span class="dt">\</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.workflow_runs[] | {name, run_number, duration_ms: (.updated_at - .created_at)}&#39;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Check action caching efficiency</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token &lt;GITHUB_TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/cache <span class="dt">\</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.actions_caches[] | {key, size_in_bytes, created_at}&#39;</span></span></code></pre></div>
+<h4 id="commands-to-never-use-in-production-1">Commands to NEVER use in
+production</h4>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: curl -X DELETE to remove all action runs</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    Loss of build history; audit trail destroyed</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Commit GitHub token to repository</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#    Exposes credentials; anyone can impersonate workflow</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Disable branch protection while fixing workflow</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    Allows untested code to merge</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Scale down runners without stopping active jobs</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    Aborts builds; incomplete deployments</span></span></code></pre></div>
+<hr />
+<h2 id="argocd-production-debugging">ArgoCD Production Debugging</h2>
+<h3 id="scenario-diagnosing-argocd-application-sync-failures">Scenario:
+Diagnosing ArgoCD Application Sync Failures</h3>
+<p><strong>Prerequisites</strong>: Applications out of sync, deployments
+not updating, GitOps not working<br />
+<strong>Common Causes</strong>: Git repository unreachable, credentials
+invalid, Kubernetes cluster disconnected, hook failure</p>
+<h4 id="argocd-application-and-sync-status">ArgoCD Application and Sync
+Status</h4>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check ArgoCD server status</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get pods <span class="at">-n</span> argocd</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: argocd-server, argocd-repo-server, argocd-application-controller, argocd-dex-server</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Get all applications and sync status</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app list</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="at">-n</span> argocd <span class="at">-o</span> wide</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Get detailed application status</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check application sync policy</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-A</span> 5 <span class="st">&quot;syncPolicy&quot;</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Auto-sync enabled, prune, self-heal settings</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Monitor application resources</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app resources <span class="op">&lt;</span>app-name<span class="op">&gt;</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get all <span class="at">-n</span> <span class="op">&lt;</span>app-namespace<span class="op">&gt;</span> -l app.kubernetes.io/instance=<span class="op">&lt;</span>app-name<span class="op">&gt;</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check Git repository connectivity</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> repo list</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get repo <span class="at">-n</span> argocd</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Test specific repository</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> repo get https://<span class="op">&lt;</span>git-repo<span class="op">&gt;</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: Connection successful</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Check application manifest generation</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app manifests <span class="op">&lt;</span>app-name<span class="op">&gt;</span> --local</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Generated manifests from Git repository</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Monitor ArgoCD application controller logs</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> argocd deployment/argocd-application-controller <span class="at">-f</span> <span class="at">--all-containers</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Look for: sync errors, reconciliation failures</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Check ArgoCD repo server logs</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> argocd deployment/argocd-repo-server <span class="at">-f</span> <span class="at">--all-containers</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Look for: Git fetch errors, manifest rendering issues</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Monitor ArgoCD API server</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> argocd deployment/argocd-server <span class="at">-f</span> <span class="at">--all-containers</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Look for: Authentication errors, API issues</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Check resource quotas and limits</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe namespace <span class="op">&lt;</span>app-namespace<span class="op">&gt;</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="co"># May show: Limits preventing application deployment</span></span></code></pre></div>
+<h4 id="argocd-git-repository-and-sync-issues">ArgoCD Git Repository and
+Sync Issues</h4>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Verify Git credentials</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> repo list <span class="kw">|</span> <span class="fu">grep</span> <span class="op">&lt;</span>repo-url<span class="op">&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: Status field (should show &quot;Successful&quot;)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Test Git SSH key connectivity</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Add SSH key to ArgoCD:</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> repo add git@github.com:<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>.git <span class="at">--ssh-client-cert-file</span> <span class="op">&lt;</span>cert-path<span class="op">&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Or via UI: Settings &gt; Repositories &gt; Connect</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Check commit hash in application</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;Revision&quot;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Current synced commit</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Compare with latest Git commit</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span> --refresh hard</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Forces Git fetch to get latest</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Check for sync errors</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd <span class="at">-o</span> jsonpath=<span class="st">&#39;{.status.conditions}&#39;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Error conditions if sync failed</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: View application events</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-A</span> 20 <span class="st">&quot;Events:&quot;</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Recent application state changes</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Manually trigger sync</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app sync <span class="op">&lt;</span>app-name<span class="op">&gt;</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Initiates immediate synchronization</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Dry-run application to see changes</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app diff <span class="op">&lt;</span>app-name<span class="op">&gt;</span> --local</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: What would be applied without actually applying</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Check Git branch for app</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd <span class="at">-o</span> jsonpath=<span class="st">&#39;{.spec.source.targetRevision}&#39;</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Configured branch (e.g., &quot;main&quot;, &quot;master&quot;, tag)</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Verify Kustomize/Helm configuration</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co"># For Kustomize: check kustomization.yaml in Git</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="co"># For Helm: check helm values in ArgoCD application</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd <span class="at">-o</span> yaml <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-A</span> 10 <span class="st">&quot;source:&quot;</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Monitor application resource drift</span></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app wait <span class="op">&lt;</span>app-name<span class="op">&gt;</span> --sync</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Waits for application to reach desired state</span></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Check application health status</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd <span class="at">-o</span> jsonpath=<span class="st">&#39;{.status.health.status}&#39;</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Healthy, Degraded, Unknown, Progressing</span></span></code></pre></div>
+<h4 id="argocd-server-and-controller-management">ArgoCD Server and
+Controller Management</h4>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check ArgoCD RBAC configuration</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get clusterrole,clusterrolebinding <span class="at">-n</span> argocd</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: ArgoCD service account permissions</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Verify ArgoCD can access target clusters</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> cluster list</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: Clusters and their connection status</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Test cluster authentication</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> cluster info <span class="op">&lt;</span>cluster-name<span class="op">&gt;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verifies: ArgoCD can connect to cluster</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check ArgoCD memory usage</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> top pod <span class="at">-n</span> argocd</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor: repo-server and application-controller memory</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Monitor ArgoCD notification system</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret argocd-notifications-cm <span class="at">-n</span> argocd <span class="at">-o</span> yaml</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Notification configuration (email, Slack, etc.)</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check notification delivery</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;notification\|webhook&quot;</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co"># May show notification status</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Verify ArgoCD TLS certificate</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co"># For Kubernetes secret:</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret argocd-server-tls <span class="at">-n</span> argocd <span class="at">-o</span> yaml</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: cert validity period</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Check ArgoCD UI accessibility</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get svc <span class="at">-n</span> argocd <span class="kw">|</span> <span class="fu">grep</span> argocd-server</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Get: Service IP/port for access</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Monitor ArgoCD performance metrics</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co"># If Prometheus enabled:</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> port-forward <span class="at">-n</span> argocd svc/argocd-metrics 8082:8082</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8082/metrics <span class="kw">|</span> <span class="fu">grep</span> argocd</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Check ArgoCD admin password status</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> account list</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Configured user accounts</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Verify webhook secret configuration</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret <span class="at">-n</span> argocd <span class="kw">|</span> <span class="fu">grep</span> webhook</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Used for GitHub/GitLab webhook verification</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Monitor ArgoCD SSO configuration</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret argocd-secret <span class="at">-n</span> argocd <span class="at">-o</span> yaml</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Contains: OIDC, LDAP configuration</span></span></code></pre></div>
+<h4 id="argocd-helm-and-kustomize-rendering">ArgoCD Helm and Kustomize
+Rendering</h4>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Test Helm rendering locally</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">helm</span> template <span class="op">&lt;</span>release-name<span class="op">&gt;</span> <span class="op">&lt;</span>chart-path<span class="op">&gt;</span> -f <span class="op">&lt;</span>values.yaml<span class="op">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Generated manifests</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Verify Helm repositories in ArgoCD</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> repo list <span class="kw">|</span> <span class="fu">grep</span> helm</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Should list: Helm repository URLs</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Test Helm chart fetch</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> repo get <span class="op">&lt;</span>helm-repo-url<span class="op">&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verifies: Can access Helm repository</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check Kustomize build</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="ex">kustomize</span> build .</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Generated manifests from Kustomize</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Verify values file resolution</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="op">&lt;</span>app-name<span class="op">&gt;</span> -n argocd <span class="at">-o</span> yaml <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-A</span> 5 <span class="st">&quot;helm:&quot;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Chart, version, values configured</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Test Helm values overrides</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="ex">helm</span> template <span class="op">&lt;</span>chart<span class="op">&gt;</span> --values <span class="op">&lt;</span>override.yaml<span class="op">&gt;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Validates: Override values work as expected</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Check for circular Kustomize bases</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co"># In Git: ensure bases don&#39;t reference each other</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> kustomization.yaml <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;bases:&quot;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Verify Helm plugin installation</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span> --show-operation</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Which rendering tool and parameters used</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Monitor slow rendering (repo-server logs)</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> argocd deployment/argocd-repo-server <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;render\|timeout&quot;</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="co"># May indicate: Complex chart or large manifests</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Test manifest size limits</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="co"># ArgoCD limit ~100MB manifests</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="fu">wc</span> <span class="at">-l</span> /tmp/generated-manifests.yaml</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="co"># If &gt; 1M lines, may exceed limits</span></span></code></pre></div>
+<h4 id="argocd-continuous-deployment-workflow">ArgoCD Continuous
+Deployment Workflow</h4>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve environment variables from secret</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret argocd-secret <span class="at">-n</span> argocd <span class="at">-o</span> jsonpath=<span class="st">&#39;{.data}&#39;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: Extract Git credentials</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret argocd-secret <span class="at">-n</span> argocd <span class="dt">\</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> jsonpath=<span class="st">&#39;{.data.github_key}&#39;</span> <span class="kw">|</span> <span class="fu">base64</span> <span class="at">-d</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Export ArgoCD CLI token</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> login <span class="op">&lt;</span>argocd-server<span class="op">&gt;</span> --username admin <span class="at">--password</span> <span class="op">&lt;</span>password<span class="op">&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ARGOCD_OPTS</span><span class="op">=</span><span class="st">&#39;--grpc-web&#39;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># View current ArgoCD configuration</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.argocd/config</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Contains: Server, auth token (SENSITIVE!)</span></span></code></pre></div>
+<h4 id="commands-to-never-use-in-production-2">Commands to NEVER use in
+production</h4>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: argocd app delete &lt;app-name&gt; --cascade without confirmation</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    Deletes all associated Kubernetes resources</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: kubectl delete all -n argocd</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#    Destroys ArgoCD completely; recovery difficult</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Modify ArgoCD YAML directly while controller running</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    May cause reconciliation conflicts</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Force push to Git branch while ArgoCD syncing</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    May cause out-of-sync state or rollback</span></span></code></pre></div>
+<hr />
+<h2 id="gitlab-cicd-production-debugging">GitLab CI/CD Production
+Debugging</h2>
+<h3 id="scenario-diagnosing-gitlab-ci-pipeline-failures">Scenario:
+Diagnosing GitLab CI Pipeline Failures</h3>
+<p><strong>Prerequisites</strong>: Pipelines not triggering, jobs
+failing, runners not picking up jobs<br />
+<strong>Common Causes</strong>: <code>.gitlab-ci.yml</code> syntax
+error, runner offline, artifacts storage full, API token expired</p>
+<h4 id="gitlab-ci-pipeline-status-and-logs">GitLab CI Pipeline Status
+and Logs</h4>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check CI/CD pipeline status</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API:</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/pipelines <span class="dt">\</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.[0] | {id, status, created_at}&#39;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Get detailed pipeline information</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/pipelines/<span class="op">&lt;</span>pipeline-id<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.&#39;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Check job status and logs</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/pipelines/<span class="op">&lt;</span>pipeline-id<span class="op">&gt;</span>/jobs <span class="dt">\</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.[] | {id, name, status, stage}&#39;</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Get job logs</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/jobs/<span class="op">&lt;</span>job-id<span class="op">&gt;</span>/log</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Validate `.gitlab-ci.yml` syntax</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API:</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/x-www-form-urlencoded&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&quot;dry_run=true&amp;content=&lt;file-content&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/ci/lint</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check GitLab CI configuration</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> .gitlab-ci.yml</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Look for: stages, jobs, only/except, variables</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Verify pipeline trigger settings</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API: Webhook delivery</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/hooks</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Monitor CI/CD variables</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API:</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/variables</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Check pipeline schedules (for scheduled jobs)</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/pipeline_schedules</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Monitor protected branch pipeline restrictions</span></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API: branch protection rules</span></span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Check runner group assignment</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/runners</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Get artifact information</span></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/projects/<span class="op">&lt;</span>project-id<span class="op">&gt;</span>/pipelines/<span class="op">&lt;</span>pipeline-id<span class="op">&gt;</span>/artifacts</span></code></pre></div>
+<h4 id="gitlab-runner-management">GitLab Runner Management</h4>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check runner status</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Via UI: Admin &gt; Runners (if admin access)</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API:</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: &lt;admin-token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  https://gitlab.example.com/api/v4/runners</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Check runner health</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># On runner machine:</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="ex">gitlab-runner</span> verify</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Configuration and connectivity status</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Monitor runner processes</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> gitlab-runner</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: Main process and job processes</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check runner logs</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> /var/log/gitlab-runner/system.log</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co"># For systemd: journalctl -u gitlab-runner -f</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Test runner connectivity to GitLab</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co"># On runner:</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> https://gitlab.example.com</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return 200</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Verify runner can execute jobs</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="ex">gitlab-runner</span> <span class="at">--version</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="ex">gitlab-runner</span> verify <span class="at">--delete</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Check runner cache status</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Locate cache directory (in config.toml: cache_dir)</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="fu">du</span> <span class="at">-sh</span> <span class="op">&lt;</span>cache-dir<span class="op">&gt;</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a><span class="co"># If full, may prevent job execution</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Verify runner Docker/VM connectivity</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="co"># If Docker executor:</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> ps  <span class="co"># Should work</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="co"># If VM executor:</span></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> aux <span class="kw">|</span> <span class="fu">grep</span> qemu  <span class="co"># Check VM processes</span></span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Monitor runner resource usage</span></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="ex">top</span> <span class="at">-p</span> <span class="va">$(</span><span class="ex">pgrep</span> <span class="at">-f</span> gitlab-runner<span class="va">)</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Watch: CPU, memory, threads during builds</span></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Check runner auto-scale setting</span></span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a><span class="co"># In config.toml: [runners.machine]</span></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: max_builds, idle_count, idle_time</span></span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Register new runner if needed</span></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a><span class="ex">gitlab-runner</span> register <span class="dt">\</span></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>  <span class="at">--url</span> https://gitlab.example.com/ <span class="dt">\</span></span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>  <span class="at">--registration-token</span> <span class="op">&lt;</span>token<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">--executor</span> docker <span class="dt">\</span></span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">--docker-image</span> alpine:latest</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Update runner configuration</span></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/gitlab-runner/config.toml</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> gitlab-runner restart</span></code></pre></div>
+<h4 id="commands-to-never-use-in-production-3">Commands to NEVER use in
+production</h4>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: gitlab-runner uninstall without backing up config.toml</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    Loses runner configuration permanently</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Commit .gitlab-ci.yml with hardcoded credentials</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#    Use CI/CD variables instead</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Kill running jobs to free resources</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    Use: gitlab-runner stop to gracefully stop</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Fill runner cache without cleanup</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    Prevents new builds; run: gitlab-runner cache-clear</span></span></code></pre></div>
+<hr />
+<h2 id="spinnaker-production-debugging">Spinnaker Production
+Debugging</h2>
+<h3
+id="scenario-diagnosing-spinnaker-deployment-pipeline-failures">Scenario:
+Diagnosing Spinnaker Deployment Pipeline Failures</h3>
+<p><strong>Prerequisites</strong>: Deployments not progressing, pipeline
+stages failing, integration with cloud provider broken<br />
+<strong>Common Causes</strong>: Provider account misconfigured,
+deployment manifest invalid, gate timeout, insufficient permissions</p>
+<h4 id="spinnaker-pipeline-and-stage-monitoring">Spinnaker Pipeline and
+Stage Monitoring</h4>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: Check Spinnaker microservices status</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get pods <span class="at">-n</span> spinnaker</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: deck, gate, orca, clouddriver, front50, rosco</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 2: Get pipeline execution status</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Via API:</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;X-Auth-Token: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  http://localhost:8084/applications/<span class="op">&lt;</span>app<span class="op">&gt;</span>/pipelines</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: Get execution details</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;X-Auth-Token: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  http://localhost:8084/applications/<span class="op">&lt;</span>app<span class="op">&gt;</span>/executions/<span class="op">&lt;</span>execution-id<span class="op">&gt;</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: Check pipeline stage status</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;X-Auth-Token: &lt;token&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  http://localhost:8084/applications/<span class="op">&lt;</span>app<span class="op">&gt;</span>/executions/<span class="op">&lt;</span>execution-id<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.stages[] | {name, status, startTime}&#39;</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 5: Monitor Spinnaker logs</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> spinnaker deployment/orca <span class="at">-f</span>  <span class="co"># Orchestration</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> spinnaker deployment/clouddriver <span class="at">-f</span>  <span class="co"># Cloud integration</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> spinnaker deployment/rosco <span class="at">-f</span>  <span class="co"># Artifact building (AMI, etc.)</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 6: Check Spinnaker front end connectivity</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> http://localhost:9000</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return 200 (Deck UI)</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 7: Verify cloud provider credentials</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a><span class="co"># For AWS:</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret <span class="at">-n</span> spinnaker <span class="kw">|</span> <span class="fu">grep</span> aws</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a><span class="co"># For GCP:</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get secret <span class="at">-n</span> spinnaker <span class="kw">|</span> <span class="fu">grep</span> gcp</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 8: Check application configuration</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get application <span class="op">&lt;</span>app<span class="op">&gt;</span> -n spinnaker</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Shows: Pipeline configuration and current executions</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 9: Monitor Spinnaker thread usage</span></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> exec <span class="at">-it</span> deployment/orca <span class="at">-n</span> spinnaker <span class="at">--</span> <span class="dt">\</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>  curl <span class="at">-s</span> http://localhost:8083/health <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.details&#39;</span></span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 10: Check for deployment manifest issues</span></span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate manifest in UI or via:</span></span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8084/generic/validateManifest <span class="dt">\</span></span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;@manifest.json&#39;</span></span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 11: Verify canary analysis configuration (if using)</span></span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Check: canary stage settings, baseline, canary configurations</span></span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 12: Monitor Spinnaker object storage (front50)</span></span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> spinnaker deployment/front50 <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;storage\|s3&quot;</span></span></code></pre></div>
+<h4 id="commands-to-never-use-in-production-4">Commands to NEVER use in
+production</h4>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: kubectl delete all -n spinnaker</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    Destroys Spinnaker; all pipelines broken</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Modify Spinnaker ConfigMap while orca running</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#    May cause inconsistent state</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ NEVER: Force delete executing pipeline</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    In-flight deployments may become orphaned</span></span></code></pre></div>
+<hr />
+<h2 id="recommended-additional-cicd-tools-and-debugging">Recommended
+Additional CI/CD Tools and Debugging</h2>
+<h3 id="gitops-and-deployment-tools">GitOps and Deployment Tools</h3>
+<p><strong>Flux CD</strong> - GitOps operator for continuous
+deployment</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Flux status</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">flux</span> check</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get flux resources</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get all <span class="at">-n</span> flux-system</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># View Flux logs</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="ex">flux</span> logs <span class="at">--follow</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: https://fluxcd.io/docs/guides/troubleshooting/</span></span></code></pre></div>
+<p><strong>Helm</strong> - Package manager for Kubernetes</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify Helm chart syntax</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ex">helm</span> lint <span class="op">&lt;</span>chart-path<span class="op">&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Dry-run deployment</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="ex">helm</span> install <span class="at">--dry-run</span> <span class="at">--debug</span> <span class="op">&lt;</span>release<span class="op">&gt;</span> <span class="op">&lt;</span>chart<span class="op">&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: https://helm.sh/docs/</span></span></code></pre></div>
+<p><strong>Terraform</strong> - Infrastructure as Code</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate Terraform syntax</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> validate</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plan changes (dry-run)</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> plan <span class="at">-out</span><span class="op">=</span>tfplan</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Terraform state</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="ex">terraform</span> state list</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: https://www.terraform.io/docs/</span></span></code></pre></div>
+<h3 id="test-and-build-automation">Test and Build Automation</h3>
+<p><strong>SonarQube</strong> - Code quality and security scanning</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check SonarQube server status</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:9000/api/system/status <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.status&#39;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get project analysis results</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:9000/api/projects/search <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.components[]&#39;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: https://docs.sonarqube.org/</span></span></code></pre></div>
+<p><strong>JFrog Artifactory</strong> - Artifact management</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Artifactory health</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-u</span><span class="op">&lt;</span>user<span class="op">&gt;</span>:<span class="op">&lt;</span>pass<span class="op">&gt;</span> -I http://artifactory:8081/artifactory</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List repositories</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-u</span><span class="op">&lt;</span>user<span class="op">&gt;</span>:<span class="op">&lt;</span>pass<span class="op">&gt;</span> http://artifactory:8081/artifactory/api/repositories</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: https://www.jfrog.com/confluence/display/JFROG/Artifactory</span></span></code></pre></div>
+<p><strong>Docker Registry</strong> - Container image storage</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check registry health</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:5000/v2/_catalog</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List images</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:5000/v2/_catalog <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.repositories&#39;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: https://docs.docker.com/registry/</span></span></code></pre></div>
+<hr />
+<h2 id="critical-cicd-debugging-principles">Critical CI/CD Debugging
+Principles</h2>
+<h3 id="investigation-methodology">Investigation Methodology</h3>
+<pre><code>1. Identify failing component (pipeline, job, stage)
+   ↓
+2. Check component status and health
+   ↓
+3. Review recent logs (last 50-100 lines)
+   ↓
+4. Trace through dependencies (Git, artifact store, runners)
+   ↓
+5. Verify credentials and permissions
+   ↓
+6. Test with minimal configuration (dry-run)
+   ↓
+7. Check resource availability (disk, memory, CPU)
+   ↓
+8. Document and implement fix
+   ↓
+9. Verify resolution with test run
+   ↓
+10. Update documentation/runbooks</code></pre>
+<h3 id="common-failure-patterns">Common Failure Patterns</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 26%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Timeout in Git fetch</td>
+<td>Network latency, large repo</td>
+<td>Increase timeout, optimize clone</td>
+</tr>
+<tr>
+<td>“No space left” error</td>
+<td>Disk full</td>
+<td>Clean workspace, artifacts</td>
+</tr>
+<tr>
+<td>Runner offline</td>
+<td>Network issue, crash</td>
+<td>Restart runner, check logs</td>
+</tr>
+<tr>
+<td>Artifact not found</td>
+<td>Build failed, incorrect path</td>
+<td>Check build logs, verify path</td>
+</tr>
+<tr>
+<td>Credential error</td>
+<td>Token expired, wrong secret</td>
+<td>Rotate credentials, update secret</td>
+</tr>
+<tr>
+<td>Manifest invalid</td>
+<td>YAML/JSON syntax error</td>
+<td>Validate with linter, show diff</td>
+</tr>
+<tr>
+<td>Rate limit hit</td>
+<td>Too many API calls</td>
+<td>Implement backoff, cache results</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pre-production-debugging-checklist">Pre-Production Debugging
+Checklist</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />All logs configured and
+accessible</label></li>
+<li><label><input type="checkbox" />Metrics/monitoring in
+place</label></li>
+<li><label><input type="checkbox" />Runbooks documented</label></li>
+<li><label><input type="checkbox" />Credentials rotated
+recently</label></li>
+<li><label><input type="checkbox" />Backups exist for critical
+data</label></li>
+<li><label><input type="checkbox" />Resource limits
+verified</label></li>
+<li><label><input type="checkbox" />Integration tests
+passing</label></li>
+<li><label><input type="checkbox" />Rollback procedure
+tested</label></li>
+<li><label><input type="checkbox" />On-call alerting
+configured</label></li>
+<li><label><input type="checkbox" />Access controls
+verified</label></li>
+</ul>
+<h3 id="tools-and-commands-quick-reference">Tools and Commands Quick
+Reference</h3>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Jenkins</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> status jenkins</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> /var/log/jenkins/jenkins.log</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://localhost:8080/api/json <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.jobs&#39;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co"># GitHub Actions</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: token </span><span class="va">$TOKEN</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  https://api.github.com/repos/<span class="op">&lt;</span>owner<span class="op">&gt;</span>/<span class="op">&lt;</span>repo<span class="op">&gt;</span>/actions/runs</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ArgoCD</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app list</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="ex">argocd</span> app get <span class="op">&lt;</span>app-name<span class="op">&gt;</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs <span class="at">-n</span> argocd deployment/argocd-application-controller</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="co"># GitLab CI</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;PRIVATE-TOKEN: </span><span class="va">$TOKEN</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  https://gitlab.com/api/v4/projects/<span class="op">&lt;</span>id<span class="op">&gt;</span>/pipelines</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Spinnaker</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;X-Auth-Token: </span><span class="va">$TOKEN</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>  http://localhost:8084/applications/<span class="op">&lt;</span>app<span class="op">&gt;</span>/pipelines</span></code></pre></div>
+<h3 id="dangerous-cicd-commands">Dangerous CI/CD Commands</h3>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CRITICAL - NEVER in production:</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> /var/lib/jenkins/jobs                  <span class="co"># Delete all jobs</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> delete all <span class="at">-n</span> <span class="op">&lt;</span>ci-cd-system<span class="op">&gt;</span>          <span class="co"># Delete CI/CD system</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Clear</span> artifact storage without backup         <span class="co"># Loss of build artifacts</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Force</span> push to protected branch                <span class="co"># Bypass protections</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="ex">Delete</span> pipeline without snapshots             <span class="co"># Lose pipeline config</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Kill</span> running deployment jobs                  <span class="co"># Incomplete deployments</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="ex">Remove</span> credentials without rotation           <span class="co"># Service outage</span></span></code></pre></div>
+<h3 id="documentation-references">Documentation References</h3>
+<p><strong>Jenkins</strong> - Official Docs: https://www.jenkins.io/doc/
+- Plugin Documentation: https://plugins.jenkins.io/ - Pipeline Guide:
+https://www.jenkins.io/doc/book/pipeline/</p>
+<p><strong>GitHub Actions</strong> - Official Docs:
+https://docs.github.com/en/actions - Troubleshooting:
+https://docs.github.com/en/actions/troubleshooting-workflow-runs - API
+Reference: https://docs.github.com/en/rest/actions</p>
+<p><strong>ArgoCD</strong> - Official Docs:
+https://argo-cd.readthedocs.io/ - Troubleshooting:
+https://argo-cd.readthedocs.io/en/stable/faq/ - Application Spec:
+https://argo-cd.readthedocs.io/en/stable/user-guide/application/</p>
+<p><strong>GitLab CI/CD</strong> - Official Docs:
+https://docs.gitlab.com/ee/ci/ - Runner Guide:
+https://docs.gitlab.com/runner/ - YAML Reference:
+https://docs.gitlab.com/ee/ci/yaml/</p>
+<p><strong>Spinnaker</strong> - Official Docs:
+https://spinnaker.io/docs/ - Troubleshooting:
+https://spinnaker.io/docs/troubleshooting/ - Architecture:
+https://spinnaker.io/docs/reference/architecture/</p>
+<hr />
+<p><strong>Last Updated</strong>: January 2026<br />
+<strong>CI/CD Platforms Covered</strong>: Jenkins, GitHub Actions,
+ArgoCD, GitLab CI, Spinnaker, Flux, and more<br />
+<strong>Severity Level</strong>: Production Critical<br />
+<strong>Review Frequency</strong>: Monthly (tools update frequently)</p>
+
+            <a href="/index.html" class="back-link">← Back to Home</a>
+        </main>
+    </div>
+</body>
+</html>
