@@ -25,19 +25,20 @@ RUN apk add --no-cache \
     openssl
 
 # Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
-
-# Set PATH to include local Python packages
-ENV PATH=/root/.local/bin:$PATH
-
-# Copy documentation
-COPY mkdocs.yml .
-COPY docs/ ./docs/
+COPY --from=builder /root/.local /home/mkdocs/.local
 
 # Create non-root user for security
 RUN addgroup -g 1000 mkdocs && \
     adduser -u 1000 -G mkdocs -s /bin/sh -D mkdocs && \
-    chown -R mkdocs:mkdocs /app
+    chown -R mkdocs:mkdocs /app && \
+    chown -R mkdocs:mkdocs /home/mkdocs/.local
+
+# Set PATH to include local Python packages
+ENV PATH=/home/mkdocs/.local/bin:$PATH
+
+# Copy documentation
+COPY mkdocs.yml .
+COPY docs/ ./docs/
 
 USER mkdocs
 

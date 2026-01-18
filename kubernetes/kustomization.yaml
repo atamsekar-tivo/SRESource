@@ -1,16 +1,5 @@
 namespace: default
 
-labels:
-  - includeSelectors: true
-    pairs:
-      app: sresource
-      managed-by: kustomize
-
-annotations:
-  - includeSelectors: true
-    pairs:
-      description: SRESource - Production debugging and operations guide
-
 resources:
   - deployment.yaml
   - service.yaml

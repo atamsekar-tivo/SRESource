@@ -57,6 +57,7 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
       type: datetime
+      fallback_to_build_date: true
 
 markdown_extensions:
   - pymdownx.highlight:
