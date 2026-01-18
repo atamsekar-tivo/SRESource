@@ -1,14 +1,15 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
 namespace: default
 
-commonLabels:
-  app: sresource
-  managed-by: kustomize
+labels:
+  - includeSelectors: true
+    pairs:
+      app: sresource
+      managed-by: kustomize
 
-commonAnnotations:
-  description: SRESource - Production debugging and operations guide
+annotations:
+  - includeSelectors: true
+    pairs:
+      description: SRESource - Production debugging and operations guide
 
 resources:
   - deployment.yaml
