@@ -7,6 +7,7 @@ edit_uri: edit/main/docs/
 
 nav:
   - Home: index.md
+  - Getting Started: FORMATTING_GUIDE.md
   - Kubernetes:
       - Kubernetes Debugging: kubernetes-debugging-commands.md
       - EKS Production Guide: production-debugging-eks.md
@@ -29,27 +30,26 @@ theme:
   favicon: https://raw.githubusercontent.com/atamsekar-tivo/SRESource/main/docs/assets/favicon.ico
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: blue
+      accent: blue
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: blue
+      accent: blue
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
   features:
     - navigation.instant
-    - navigation.tabs
-    - navigation.tabs.sticky
+    - navigation.sections
     - navigation.top
-    - navigation.indexes
     - search.suggest
     - search.highlight
     - content.code.copy
-    - content.code.annotate
+    - content.code.select
+    - toc.integrate
 
 plugins:
   - search:
@@ -88,6 +88,9 @@ extra:
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/in/atamsekar-tivo
   generator: false
+
+extra_css:
+  - css/custom.css
 
 copyright: |
   &copy; 2024-2026 Anirudh Tamsekar. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>

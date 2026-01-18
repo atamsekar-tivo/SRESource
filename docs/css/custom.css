@@ -1,0 +1,161 @@
+/* Enhanced readability and visual hierarchy */
+
+:root {
+  --md-code-bg: #f5f5f5;
+  --md-code-fg: #333;
+  --md-typeset-table-color: rgba(0, 0, 0, 0.87);
+}
+
+/* Code blocks - better separation */
+.highlight {
+  background-color: #f8f9fa !important;
+  border-left: 3px solid #2196F3 !important;
+  padding: 12px 16px !important;
+  margin: 16px 0 !important;
+  border-radius: 4px;
+}
+
+pre {
+  background-color: #f8f9fa !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+code {
+  background-color: #f0f0f0 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+/* Admonitions - better spacing */
+.admonition {
+  margin: 20px 0 !important;
+  padding: 12px 16px !important;
+  border-left: 4px solid;
+  border-radius: 4px;
+}
+
+.admonition.note {
+  border-left-color: #2196F3;
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+.admonition.warning {
+  border-left-color: #FF9800;
+  background-color: rgba(255, 152, 0, 0.05);
+}
+
+.admonition.danger {
+  border-left-color: #F44336;
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.admonition.tip {
+  border-left-color: #4CAF50;
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+/* Better spacing for paragraphs */
+p {
+  line-height: 1.8 !important;
+  margin-bottom: 16px !important;
+}
+
+/* Headings with better spacing */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 24px !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+}
+
+h1 {
+  font-size: 2em !important;
+  border-bottom: 2px solid #2196F3;
+  padding-bottom: 8px;
+}
+
+h2 {
+  font-size: 1.5em !important;
+  color: #1976D2;
+}
+
+h3 {
+  font-size: 1.2em !important;
+  color: #2196F3;
+}
+
+/* Lists with better spacing */
+ul, ol {
+  margin-left: 24px !important;
+}
+
+li {
+  margin-bottom: 8px !important;
+  line-height: 1.6 !important;
+}
+
+/* Tables - better readability */
+table {
+  margin: 20px 0 !important;
+  border-collapse: collapse !important;
+  width: 100% !important;
+}
+
+th {
+  background-color: #2196F3 !important;
+  color: white !important;
+  padding: 12px !important;
+  text-align: left !important;
+  font-weight: 600;
+}
+
+td {
+  padding: 12px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+tbody tr:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* Command/Output separation */
+.language-bash, .language-sh, .language-shell {
+  background-color: #1e1e1e !important;
+  color: #00ff00 !important;
+}
+
+.language-bash code, .language-sh code, .language-shell code {
+  color: #00ff00 !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+/* Tab styling */
+.tabbed-set {
+  margin: 20px 0 !important;
+}
+
+.tabbed-content {
+  padding: 16px !important;
+}
+
+/* Better content width */
+.md-content {
+  max-width: 900px;
+}
+
+/* Comment styling for better distinction */
+.c, .cm, .c1 {
+  color: #008000 !important;
+  font-style: italic !important;
+}
+
+/* Command output styling */
+.language-text {
+  background-color: #f5f5f5 !important;
+  border-left: 2px solid #666 !important;
+}
