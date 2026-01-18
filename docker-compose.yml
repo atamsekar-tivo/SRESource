@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  sresource:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sresource-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docs:/app/docs:ro
+      - ./mkdocs.yml:/app/mkdocs.yml:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - sresource
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  sresource:
+    driver: bridge

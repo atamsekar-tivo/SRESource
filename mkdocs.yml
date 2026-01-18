@@ -1,0 +1,92 @@
+site_name: SRESource
+site_description: Comprehensive production debugging and operations guide for SRE/DevOps/Platform Engineers
+site_author: Anirudh Tamsekar
+repo_url: https://github.com/atamsekar-tivo/SRESource
+repo_name: SRESource
+edit_uri: edit/main/docs/
+
+nav:
+  - Home: index.md
+  - Kubernetes:
+      - Kubernetes Debugging: kubernetes-debugging-commands.md
+      - EKS Production Guide: production-debugging-eks.md
+  - Operating Systems:
+      - Unix/Linux Debugging: production-debugging-unix-linux.md
+  - Networking:
+      - Network Debugging: production-networking-debugging.md
+  - CI/CD:
+      - CI/CD Tools & Platforms: production-debugging-ci-cd-tools.md
+  - Cloud & Infrastructure:
+      - IAM & Access Control: production-debugging-iam.md
+  - Databases:
+      - MySQL & PostgreSQL: production-debugging-databases.md
+  - Tools & Resources:
+      - Essential Tools Guide: TOOLS_GUIDE.md
+
+theme:
+  name: material
+  logo: https://raw.githubusercontent.com/atamsekar-tivo/SRESource/main/docs/assets/sresource-logo.svg
+  favicon: https://raw.githubusercontent.com/atamsekar-tivo/SRESource/main/docs/assets/favicon.ico
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search:
+      lang: en
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: datetime
+
+markdown_extensions:
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - tables
+  - admonition
+  - footnotes
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/atamsekar-tivo/SRESource
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/atamsekar-tivo
+  generator: false
+
+copyright: |
+  &copy; 2024-2026 Anirudh Tamsekar. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>

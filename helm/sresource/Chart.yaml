@@ -1,0 +1,20 @@
+apiVersion: v2
+name: sresource
+description: SRESource - Production debugging and operations guide for SRE/DevOps teams
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+home: https://github.com/atamsekar-tivo/SRESource
+sources:
+  - https://github.com/atamsekar-tivo/SRESource
+maintainers:
+  - name: Anirudh Tamsekar
+    email: atamsekar@example.com
+keywords:
+  - sre
+  - devops
+  - debugging
+  - documentation
+  - runbooks
+  - kubernetes
+license: CC-BY-SA-4.0
