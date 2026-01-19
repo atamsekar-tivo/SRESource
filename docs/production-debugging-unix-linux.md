@@ -4,6 +4,35 @@
 
 ---
 
+## Linux Internals Quick Start (see `linux-internals.html` for deep dive)
+
+```bash
+# Identify namespace/cgroup context for a PID
+lsns -p <PID>         # Namespaces (pid, net, mnt, uts, user)
+cat /proc/<PID>/cgroup
+nsenter -t <PID> --mount --uts --ipc --net --pid bash  # Enter all namespaces (root only)
+
+# Check cgroup v2 limits on a node
+cat /sys/fs/cgroup/cpu.max      # CPU quota/period
+cat /sys/fs/cgroup/memory.max   # Memory limit (max for unlimited)
+systemd-cgtop                   # Live cgroup CPU/mem I/O usage
+
+# Fast syscall + scheduler sanity
+pidstat -u -r -d 1 5            # CPU/mem/I/O per PID
+strace -f -tt -p <PID> -c -s 80 # Syscalls + time (use briefly)
+perf stat -p <PID> sleep 10     # High-level CPU counters
+
+# Kernel networking dataplane (Service/Pod routing)
+iptables -t nat -L KUBE-SERVICES -n -v --line-numbers | head
+nft list ruleset | head -50           # If nftables is enabled
+conntrack -L | head                  # Conntrack state table
+
+# Security posture quick view
+ps -eo pid,comm,seccomp | head       # Seccomp status
+aa-status 2>/dev/null || true        # AppArmor profiles (Debian/Ubuntu)
+getenforce 2>/dev/null || echo "SELinux not enabled"  # SELinux mode
+```
+
 ## Scenario: Diagnosing High CPU Utilization
 
 **Prerequisites**: CPU usage consistently > 80%, application performance degraded  

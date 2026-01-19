@@ -3,234 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.8;
-            color: #333;
-            background-color: #f5f5f5;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
-            padding: 20px;
-        }
-        
-        nav {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-        
-        nav h2 {
-            font-size: 1em;
-            color: #1976D2;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #2196F3;
-            padding-bottom: 10px;
-        }
-        
-        nav ul {
-            list-style: none;
-        }
-        
-        nav li {
-            margin-bottom: 5px;
-        }
-        
-        nav a {
-            color: #2196F3;
-            text-decoration: none;
-            font-size: 0.9em;
-            display: block;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-        
-        nav a:hover {
-            background: #f0f0f0;
-            transform: translateX(5px);
-        }
-        
-        main {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        h1 {
-            color: #1976D2;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #2196F3;
-        }
-        
-        h2 {
-            color: #1976D2;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        
-        h3 {
-            color: #2196F3;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        
-        p {
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-        
-        code {
-            background: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            color: #d63384;
-        }
-        
-        pre {
-            background: #1e1e1e;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 15px 0;
-            border-left: 3px solid #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-        
-        pre code {
-            background: transparent;
-            color: #00ff00;
-            padding: 0;
-            border-radius: 0;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        
-        th {
-            background: #2196F3;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        tbody tr:hover {
-            background: #f5f5f5;
-        }
-        
-        ul, ol {
-            margin-left: 30px;
-            margin-bottom: 15px;
-        }
-        
-        li {
-            margin-bottom: 8px;
-        }
-        
-        blockquote {
-            border-left: 4px solid #2196F3;
-            padding-left: 15px;
-            margin: 15px 0;
-            color: #666;
-        }
-        
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .back-link:hover {
-            background: #1976D2;
-        }
-        
-        .toc {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        
-        .toc ul {
-            margin-left: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-            
-            nav {
-                position: relative;
-                top: 0;
-            }
-        }
-    </style>
+    <title>Production Debugging Ci Cd Tools</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <h2>Contents</h2>
-            <ul><li><a href="#jenkins-production-debugging">Jenkins Production Debugging</a></li>
-<li><a href="#github-actions-production-debugging">GitHub Actions Production</a></li>
-<li style="margin-left: 20px;"><a href="#scenario-diagnosing-github-actions-workflow-failures">Scenario:</a></li>
+    <div class="page">
+        <header>
+            <h1>Production Debugging Ci Cd Tools</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                <ul><li><a href="#jenkins-production-debugging">Jenkins Production Debugging</a></li>
+<li><a href="#github-actions-production-debugging">GitHub Actions Production
+Debugging</a></li>
 <li><a href="#argocd-production-debugging">ArgoCD Production Debugging</a></li>
-<li style="margin-left: 20px;"><a href="#scenario-diagnosing-argocd-application-sync-failures">Scenario:</a></li>
-<li><a href="#gitlab-cicd-production-debugging">GitLab CI/CD Production</a></li>
-<li style="margin-left: 20px;"><a href="#scenario-diagnosing-gitlab-ci-pipeline-failures">Scenario:</a></li>
-<li><a href="#spinnaker-production-debugging">Spinnaker Production</a></li>
-<li><a href="#recommended-additional-cicd-tools-and-debugging">Recommended</a></li>
+<li><a href="#gitlab-cicd-production-debugging">GitLab CI/CD Production
+Debugging</a></li>
+<li><a href="#spinnaker-production-debugging">Spinnaker Production
+Debugging</a></li>
+<li><a href="#recommended-additional-cicd-tools-and-debugging">Recommended
+Additional CI/CD Tools and Debugging</a></li>
+<li><a href="#critical-cicd-debugging-principles">Critical CI/CD Debugging
+Principles</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-jenkins-build-failures-and-agent-issues">Scenario:
+Diagnosing Jenkins Build Failures and Agent Issues</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-github-actions-workflow-failures">Scenario:
+Diagnosing GitHub Actions Workflow Failures</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-argocd-application-sync-failures">Scenario:
+Diagnosing ArgoCD Application Sync Failures</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-gitlab-ci-pipeline-failures">Scenario:
+Diagnosing GitLab CI Pipeline Failures</a></li>
+<li style="margin-left: 20px;"><a href="#scenario-diagnosing-spinnaker-deployment-pipeline-failures">Scenario:
+Diagnosing Spinnaker Deployment Pipeline Failures</a></li>
 <li style="margin-left: 20px;"><a href="#gitops-and-deployment-tools">GitOps and Deployment Tools</a></li>
 <li style="margin-left: 20px;"><a href="#test-and-build-automation">Test and Build Automation</a></li>
-<li><a href="#critical-cicd-debugging-principles">Critical CI/CD Debugging</a></li>
 <li style="margin-left: 20px;"><a href="#investigation-methodology">Investigation Methodology</a></li>
 <li style="margin-left: 20px;"><a href="#common-failure-patterns">Common Failure Patterns</a></li>
-<li style="margin-left: 20px;"><a href="#pre-production-debugging-checklist">Pre-Production Debugging</a></li>
-<li style="margin-left: 20px;"><a href="#tools-and-commands-quick-reference">Tools and Commands Quick</a></li>
+<li style="margin-left: 20px;"><a href="#pre-production-debugging-checklist">Pre-Production Debugging
+Checklist</a></li>
+<li style="margin-left: 20px;"><a href="#tools-and-commands-quick-reference">Tools and Commands Quick
+Reference</a></li>
 <li style="margin-left: 20px;"><a href="#dangerous-cicd-commands">Dangerous CI/CD Commands</a></li>
 <li style="margin-left: 20px;"><a href="#documentation-references">Documentation References</a></li></ul>
-        </nav>
-        <main>
-            <h1 id="production-debugging-commands-for-cicd-tools">Production
-Debugging Commands for CI/CD Tools</h1>
+            </nav>
+            <main>
+                
 <blockquote>
 <p><strong>Critical Context</strong>: CI/CD debugging often reveals
 secrets, credentials, and sensitive build artifacts. Always audit logs
@@ -1237,8 +1065,40 @@ ArgoCD, GitLab CI, Spinnaker, Flux, and more<br />
 <strong>Severity Level</strong>: Production Critical<br />
 <strong>Review Frequency</strong>: Monthly (tools update frequently)</p>
 
-            <a href="/index.html" class="back-link">← Back to Home</a>
-        </main>
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
     </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }).catch(() => {
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            });
+
+            block.appendChild(button);
+        });
+    </script>
 </body>
 </html>

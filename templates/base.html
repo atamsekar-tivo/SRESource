@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SRESource - Production Debugging & Operations{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header class="site-header">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" class="logo-icon">
+                        <rect x="4" y="4" width="24" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M10 10h12M10 16h12M10 22h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="logo-text">SRESource</span>
+                </a>
+                <nav class="main-nav">
+                    <button class="nav-toggle" onclick="toggleSidebar()">☰</button>
+                </nav>
+            </div>
+        </header>
+
+        <div class="page-wrapper">
+            <aside class="sidebar" id="sidebar">
+                {% macro render_nav(nav_dict, level=0) %}
+                    {% for key, item in nav_dict.items() %}
+                        {% if 'children' in item %}
+                            <div class="nav-section">
+                                <h3 class="nav-title">{{ item.title }}</h3>
+                                <ul class="nav-list">
+                                    {% for child_key, child_item in item.children.items() %}
+                                        <li class="nav-item">
+                                            <a href="{{ child_item.path }}" class="nav-link">{{ child_item.title }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% elif item.path != '/' %}
+                            <div class="nav-section">
+                                <a href="{{ item.path }}" class="nav-link nav-top-level">{{ item.title }}</a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endmacro %}
+
+                <nav class="sidebar-nav">
+                    {{ render_nav(nav_structure) }}
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                {% if breadcrumbs %}
+                    <div class="breadcrumbs">
+                        {% for crumb in breadcrumbs %}
+                            {% if loop.last %}
+                                <span class="breadcrumb-current">{{ crumb.title }}</span>
+                            {% else %}
+                                <a href="{{ crumb.path }}" class="breadcrumb-link">{{ crumb.title }}</a>
+                                <span class="breadcrumb-sep">/</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <article class="content">
+                    {% block content %}
+                        {% if is_html %}
+                            {{ content | safe }}
+                        {% else %}
+                            {{ content }}
+                        {% endif %}
+                    {% endblock %}
+                </article>
+
+                <footer class="content-footer">
+                    <p>SRESource — Comprehensive production debugging and operations guide for SRE/DevOps/Platform Engineers</p>
+                    <p class="footer-meta">
+                        <a href="https://github.com/atamsekar-tivo/SRESource" target="_blank">GitHub</a> •
+                        <a href="https://github.com/atamsekar-tivo/SRESource/blob/main/LICENSE" target="_blank">CC-BY-SA 4.0</a> •
+                        Last Updated: <span id="last-updated"></span>
+                    </p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('open');
+            });
+        });
+
+        // Highlight code blocks
+        document.querySelectorAll('pre code').forEach(block => {
+            hljs.highlightElement(block);
+        });
+
+        // Set last updated time
+        document.getElementById('last-updated').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>

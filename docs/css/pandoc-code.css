@@ -1,0 +1,154 @@
+/* Syntax highlighting tuned for Pandoc-generated code blocks (API-style) */
+
+div.sourceCode {
+  position: relative;
+  margin: 18px 0;
+  background: #0f172a;
+  border: 1px solid #0b1224;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+div.sourceCode pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow: auto;
+  background: transparent;
+  color: #e5e9f0;
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.95em;
+  line-height: 1.55;
+}
+
+pre > code.sourceCode {
+  white-space: pre;
+  position: relative;
+}
+
+pre > code.sourceCode > span {
+  display: inline-block;
+}
+
+pre > code.sourceCode > span:empty {
+  height: 1.2em;
+}
+
+/* Optional line numbers */
+pre.numberSource {
+  margin-left: 3em;
+  border-left: 1px solid #334155;
+  padding-left: 12px;
+}
+
+pre.numberSource code > span {
+  position: relative;
+  left: -4em;
+  counter-increment: source-line;
+}
+
+pre.numberSource code > span > a:first-child::before {
+  content: counter(source-line);
+  position: relative;
+  left: -1.2em;
+  text-align: right;
+  display: inline-block;
+  width: 3em;
+  color: #94a3b8;
+}
+
+/* Inline code defaults */
+code {
+  background: #eef2f7;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+div.sourceCode code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Syntax colors (One Dark–ish) */
+code span.al {
+  color: #ff7b72;
+  font-weight: bold;
+} /* Alert */
+code span.an,
+code span.co,
+code span.do,
+code span.pp,
+code span.wa {
+  color: #9ca3af;
+  font-style: italic;
+} /* Annotation/Comment */
+code span.at,
+code span.dt,
+code span.kw {
+  color: #7dcfff;
+  font-weight: 600;
+} /* Keywords + types */
+code span.cf {
+  color: #c792ea;
+  font-weight: 600;
+} /* Control flow */
+code span.op,
+code span.sc {
+  color: #89ddff;
+  font-weight: 600;
+} /* Operators */
+code span.bn,
+code span.dv,
+code span.fl {
+  color: #f78c6c;
+} /* Numbers */
+code span.ch,
+code span.ss,
+code span.st,
+code span.vs {
+  color: #c3e88d;
+} /* Strings */
+code span.fu {
+  color: #82aaff;
+  font-weight: 600;
+} /* Functions */
+code span.im,
+code span.ex {
+  color: #80cbc4;
+} /* Imports + executables */
+code span.va,
+code span.cn {
+  color: #f2f2f2;
+}
+code span.er {
+  color: #ff5370;
+  font-weight: 700;
+}
+
+/* Copy button */
+.code-copy {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 6px 10px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.code-copy:hover {
+  background: #2196f3;
+  border-color: #2196f3;
+  color: #0b1224;
+  transform: translateY(-1px);
+}
+
+.code-copy:active {
+  transform: translateY(0);
+}

@@ -11,226 +11,72 @@ def convert_md_to_html():
     """Convert all markdown files to HTML"""
     
     docs_dir = Path(__file__).parent / "docs"
-    
-    # HTML template
+    # HTML template (aligned with k8s-python-api look-and-feel)
     html_template = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <style>
-        * {{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }}
-        
-        body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.8;
-            color: #333;
-            background-color: #f5f5f5;
-        }}
-        
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
-            padding: 20px;
-        }}
-        
-        nav {{
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }}
-        
-        nav h2 {{
-            font-size: 1em;
-            color: #1976D2;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #2196F3;
-            padding-bottom: 10px;
-        }}
-        
-        nav ul {{
-            list-style: none;
-        }}
-        
-        nav li {{
-            margin-bottom: 5px;
-        }}
-        
-        nav a {{
-            color: #2196F3;
-            text-decoration: none;
-            font-size: 0.9em;
-            display: block;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }}
-        
-        nav a:hover {{
-            background: #f0f0f0;
-            transform: translateX(5px);
-        }}
-        
-        main {{
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }}
-        
-        h1 {{
-            color: #1976D2;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #2196F3;
-        }}
-        
-        h2 {{
-            color: #1976D2;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-        }}
-        
-        h3 {{
-            color: #2196F3;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }}
-        
-        p {{
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }}
-        
-        code {{
-            background: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            color: #d63384;
-        }}
-        
-        pre {{
-            background: #1e1e1e;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 15px 0;
-            border-left: 3px solid #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }}
-        
-        pre code {{
-            background: transparent;
-            color: #00ff00;
-            padding: 0;
-            border-radius: 0;
-        }}
-        
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }}
-        
-        th {{
-            background: #2196F3;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-        }}
-        
-        td {{
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }}
-        
-        tbody tr:hover {{
-            background: #f5f5f5;
-        }}
-        
-        ul, ol {{
-            margin-left: 30px;
-            margin-bottom: 15px;
-        }}
-        
-        li {{
-            margin-bottom: 8px;
-        }}
-        
-        blockquote {{
-            border-left: 4px solid #2196F3;
-            padding-left: 15px;
-            margin: 15px 0;
-            color: #666;
-        }}
-        
-        .back-link {{
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }}
-        
-        .back-link:hover {{
-            background: #1976D2;
-        }}
-        
-        .toc {{
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }}
-        
-        .toc ul {{
-            margin-left: 20px;
-        }}
-        
-        @media (max-width: 768px) {{
-            .container {{
-                grid-template-columns: 1fr;
-            }}
-            
-            nav {{
-                position: relative;
-                top: 0;
-            }}
-        }}
-    </style>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <h2>Contents</h2>
-            {toc}
-        </nav>
-        <main>
-            {content}
-            <a href="/index.html" class="back-link">← Back to Home</a>
-        </main>
+    <div class="page">
+        <header>
+            <h1>{title}</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                {toc}
+            </nav>
+            <main>
+                {content}
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
     </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {{
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {{
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {{
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }}).catch(() => {{
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }});
+            }});
+
+            block.appendChild(button);
+        }});
+    </script>
 </body>
 </html>"""
     
@@ -246,31 +92,40 @@ def convert_md_to_html():
         try:
             # Convert with pandoc
             result = subprocess.run(
-                ['pandoc', str(md_file), '-f', 'markdown', '-t', 'html5', '--toc', '--toc-depth=3'],
+                [
+                    'pandoc',
+                    str(md_file),
+                    '-f',
+                    'markdown',
+                    '-t',
+                    'html5',
+                    '--toc',
+                    '--toc-depth=3',
+                    '--syntax-highlighting=tango',
+                ],
                 capture_output=True,
                 text=True,
                 check=True
             )
             
             content = result.stdout
+
+            # Drop the top-level <h1> from markdown to avoid duplicate titles (header already shows it)
+            if '<h1' in content and '</h1>' in content:
+                start = content.find('<h1')
+                end = content.find('</h1>', start)
+                if end != -1:
+                    content = content[:start] + content[end + len('</h1>'):]
             
-            # Generate TOC
+            # Generate TOC via regex (captures multi-line headings)
+            import re
             toc_lines = []
-            for line in content.split('\n'):
-                if line.startswith('<h2 id='):
-                    parts = line.split('>')
-                    if len(parts) > 1:
-                        text = parts[1].split('<')[0]
-                        id_attr = line.split('id="')[1].split('"')[0] if 'id="' in line else ''
-                        if id_attr:
-                            toc_lines.append(f'<li><a href="#{id_attr}">{text}</a></li>')
-                elif line.startswith('<h3 id='):
-                    parts = line.split('>')
-                    if len(parts) > 1:
-                        text = parts[1].split('<')[0]
-                        id_attr = line.split('id="')[1].split('"')[0] if 'id="' in line else ''
-                        if id_attr:
-                            toc_lines.append(f'<li style="margin-left: 20px;"><a href="#{id_attr}">{text}</a></li>')
+            for tag, indent in (('h2', ''), ('h3', ' style="margin-left: 20px;"')):
+                pattern = rf'<{tag}\s+id="([^"]+)">(.*?)</{tag}>'
+                for match in re.finditer(pattern, content, re.DOTALL):
+                    id_attr, text = match.groups()
+                    text = text.strip()
+                    toc_lines.append(f'<li{indent}><a href="#{id_attr}">{text}</a></li>')
             
             toc_html = '<ul>' + '\n'.join(toc_lines) + '</ul>' if toc_lines else '<p>No sections</p>'
             

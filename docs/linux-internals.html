@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Internals</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <h1>Linux Internals</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                <ul><li><a href="#container-isolation-namespaces">Container Isolation:
+Namespaces</a></li>
+<li><a href="#resource-control-cgroups-v2">Resource Control: cgroups v2</a></li>
+<li><a href="#syscalls-scheduling-and-tracing">Syscalls, Scheduling, and
+Tracing</a></li>
+<li><a href="#networking-internals-services-load-balancing">Networking
+Internals (Services, Load-Balancing)</a></li>
+<li><a href="#filesystems-io-and-storage">Filesystems, I/O, and Storage</a></li>
+<li><a href="#systemd-kubelet-on-the-host">Systemd + Kubelet on the Host</a></li>
+<li><a href="#security-primitives-seccomp-apparmor-selinux">Security
+Primitives: seccomp, AppArmor, SELinux</a></li>
+<li><a href="#performance-quick-wins-host-level">Performance Quick Wins
+(host-level)</a></li>
+<li><a href="#when-to-escalate">When to Escalate</a></li></ul>
+            </nav>
+            <main>
+                
+<blockquote>
+<p><strong>How to use this page</strong>: This is the kernel-and-host
+companion to <code>production-debugging-unix-linux.html</code>. It
+focuses on container primitives (namespaces/cgroups), tracing syscalls,
+kernel networking, and host hardening. Use read-only commands first; run
+perf/strace only when impact is acceptable.</p>
+</blockquote>
+<hr />
+<h2 id="container-isolation-namespaces">Container Isolation:
+Namespaces</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List namespaces per PID (verify container isolation)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lsns</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Enter a pod&#39;s namespaces from the node (root required)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">nsenter</span> <span class="at">-t</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> --mount <span class="at">--uts</span> <span class="at">--ipc</span> <span class="at">--net</span> <span class="at">--pid</span> bash</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Launch an isolated test shell (no network)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">unshare</span> <span class="at">-n</span> <span class="at">-m</span> <span class="at">-p</span> <span class="at">--fork</span> <span class="at">--mount-proc</span> bash</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect PID namespace + hostname details</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/<span class="op">&lt;</span>PID<span class="op">&gt;</span>/status <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;NSpid|Pid|PPid&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ex">hostnamectl</span></span></code></pre></div>
+<hr />
+<h2 id="resource-control-cgroups-v2">Resource Control: cgroups v2</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Locate a process cgroup and effective limits</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/<span class="op">&lt;</span>PID<span class="op">&gt;</span>/cgroup</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">systemd-cgls</span> /sys/fs/cgroup</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/fs/cgroup/<span class="op">&lt;</span>slice<span class="op">&gt;</span>/cpu.max      <span class="co"># quota/period (e.g., &quot;200000 100000&quot;)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/fs/cgroup/<span class="op">&lt;</span>slice<span class="op">&gt;</span>/memory.max   <span class="co"># bytes (max for unlimited)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Live usage by cgroup (great for kubelet-managed pods)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">systemd-cgtop</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Pressure stall information (detect contention)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/pressure/cpu</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/pressure/memory</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/pressure/io</span></code></pre></div>
+<hr />
+<h2 id="syscalls-scheduling-and-tracing">Syscalls, Scheduling, and
+Tracing</h2>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Low-impact syscall mix and latency</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">strace</span> <span class="at">-f</span> <span class="at">-tt</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> -c <span class="at">-s</span> 80   <span class="co"># Run briefly; adds overhead</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CPU/scheduler counters for a PID</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">perf</span> stat <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> sleep 10       <span class="co"># Cycles, instructions, context switches</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Call stacks for hot paths (perf record/report)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">perf</span> record <span class="at">-g</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> -- sleep 15</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ex">perf</span> report</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># eBPF-powered oneliners (if bcc/tools available)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">execsnoop</span>     <span class="co"># Show new exec() calls</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="ex">opensnoop</span>    <span class="co"># Show open() calls</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="ex">tcplife</span>      <span class="co"># TCP life events (connections)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Kernel ftrace quick tap</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="ex">trace-cmd</span> record <span class="at">-p</span> function_graph <span class="at">-l</span> <span class="st">&#39;&lt;module&gt;*&#39;</span> sleep 5</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="ex">trace-cmd</span> report <span class="kw">|</span> <span class="fu">head</span> <span class="at">-100</span></span></code></pre></div>
+<hr />
+<h2 id="networking-internals-services-load-balancing">Networking
+Internals (Services, Load-Balancing)</h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kube-proxy rules (iptables mode)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">iptables</span> <span class="at">-t</span> nat <span class="at">-L</span> KUBE-SERVICES <span class="at">-n</span> <span class="at">-v</span> <span class="at">--line-numbers</span> <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">iptables</span> <span class="at">-t</span> nat <span class="at">-L</span> KUBE-POSTROUTING <span class="at">-n</span> <span class="at">-v</span> <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># nftables mode (some distros)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">nft</span> list ruleset <span class="kw">|</span> <span class="fu">head</span> <span class="at">-80</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Conntrack table health</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ex">conntrack</span> <span class="at">-L</span> <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.netfilter.nf_conntrack_count</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> net.netfilter.nf_conntrack_max</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Socket-level view</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="ex">ss</span> <span class="at">-Htnp</span> state established <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="ex">ss</span> <span class="at">-Htn</span> <span class="st">&#39;sport = :6443&#39;</span> <span class="kw">|</span> <span class="fu">head</span>   <span class="co"># API server traffic</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Traffic control queues (detect drops)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="ex">tc</span> <span class="at">-s</span> qdisc show dev eth0</span></code></pre></div>
+<hr />
+<h2 id="filesystems-io-and-storage">Filesystems, I/O, and Storage</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Mount + namespace view for a PID</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lsns</span> <span class="at">-t</span> mnt <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">findmnt</span> <span class="at">-R</span> /var/lib/kubelet/pods <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Disk and inode pressure</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-hT</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">df</span> <span class="at">-i</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Per-PID I/O load</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="ex">pidstat</span> <span class="at">-d</span> 1 5</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ex">iotop</span> <span class="at">-P</span> <span class="at">-b</span> <span class="at">-n</span> 3 <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># File descriptor and open files</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /proc/<span class="op">&lt;</span>PID<span class="op">&gt;</span>/fd <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ex">lsof</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<hr />
+<h2 id="systemd-kubelet-on-the-host">Systemd + Kubelet on the Host</h2>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> status kubelet</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> kubelet <span class="at">-b</span> <span class="at">-n</span> 200</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">systemd-analyze</span> blame <span class="kw">|</span> <span class="fu">head</span>        <span class="co"># Slow boot units</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">systemd-cgls</span>                         <span class="co"># Inspect unit/pod cgroups tree</span></span></code></pre></div>
+<hr />
+<h2 id="security-primitives-seccomp-apparmor-selinux">Security
+Primitives: seccomp, AppArmor, SELinux</h2>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Current seccomp mode per process</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-eo</span> pid,comm,seccomp <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># AppArmor profile status (Debian/Ubuntu)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">aa-status</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">apparmor_status</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># SELinux enforcement and denials (RHEL/CentOS/Fedora)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="ex">getenforce</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="ex">ausearch</span> <span class="at">-m</span> avc <span class="at">-ts</span> recent <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="ex">semanage</span> boolean <span class="at">-l</span> <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Auditd syscall watch (example: chmod)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="ex">auditctl</span> <span class="at">-l</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ex">auditctl</span> <span class="at">-w</span> /bin/chmod <span class="at">-p</span> x <span class="at">-k</span> chmod-watch</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="ex">ausearch</span> <span class="at">-k</span> chmod-watch <span class="kw">|</span> <span class="fu">tail</span></span></code></pre></div>
+<hr />
+<h2 id="performance-quick-wins-host-level">Performance Quick Wins
+(host-level)</h2>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-liners for hotspots</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">vmstat</span> 1 5                     <span class="co"># Run-queue, swap, system time</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pidstat</span> <span class="at">-u</span> <span class="at">-r</span> <span class="at">-d</span> 1 5           <span class="co"># CPU/mem/I/O per PID</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">perf</span> top <span class="at">--no-children</span> <span class="at">--sort</span> comm,dso  <span class="co"># CPU hotspots live</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># NUMA awareness (latency issues)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="ex">numactl</span> <span class="at">--hardware</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="ex">numastat</span> <span class="at">-p</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Page cache and dirty pages</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/meminfo <span class="kw">|</span> <span class="fu">egrep</span> <span class="st">&#39;Dirty|Writeback&#39;</span></span></code></pre></div>
+<hr />
+<h2 id="when-to-escalate">When to Escalate</h2>
+<ul>
+<li>If pressure stall info (PSI) stays high for CPU/memory/I/O, capture
+perf/strace and involve kernel/SRE.<br />
+</li>
+<li>If conntrack hits <code>nf_conntrack_max</code>, increase the table
+only with business approval and in maintenance.<br />
+</li>
+<li>If seccomp/AppArmor/SELinux denials block pods, adjust profiles via
+Kubernetes policy rather than disabling globally.<br />
+</li>
+<li>Always capture before/after metrics and reference the broader
+runbook: <code>production-debugging-unix-linux.html</code>.</li>
+</ul>
+
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }).catch(() => {
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            });
+
+            block.appendChild(button);
+        });
+    </script>
+</body>
+</html>

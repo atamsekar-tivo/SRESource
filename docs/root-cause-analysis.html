@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root Cause Analysis</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <h1>Root Cause Analysis</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                <ul><li><a href="#rca-template-fill-during-the-incident">RCA Template (fill during
+the incident)</a></li>
+<li><a href="#prioritization-rules-sregoogle-style">Prioritization Rules
+(SRE/Google-Style)</a></li>
+<li><a href="#how-to-choose-priorities-fast-triage">How to Choose Priorities
+(fast triage)</a></li>
+<li><a href="#scenarios-example-rcas">Scenarios &amp; Example RCAs</a></li>
+<li><a href="#quick-commands-links-to-capture-evidence">Quick Commands &amp;
+Links to Capture Evidence</a></li>
+<li><a href="#postmortem-essentials-after-mitigation">Postmortem Essentials
+(after mitigation)</a></li>
+<li style="margin-left: 20px;"><a href="#api-latency-regression-post-deploy">1) API Latency Regression
+Post-Deploy</a></li>
+<li style="margin-left: 20px;"><a href="#kafka-consumer-lag-spike">2) Kafka Consumer Lag Spike</a></li>
+<li style="margin-left: 20px;"><a href="#database-connection-storm">3) Database Connection Storm</a></li>
+<li style="margin-left: 20px;"><a href="#regional-outage-dependency-failure">4) Regional Outage /
+Dependency Failure</a></li></ul>
+            </nav>
+            <main>
+                
+<blockquote>
+<p><strong>Use this template during incidents.</strong> Capture facts
+quickly, prioritize safety, and document decisions for fast resolution
+and learning. Treat every entry as a working draft until the incident is
+closed.</p>
+</blockquote>
+<hr />
+<h2 id="rca-template-fill-during-the-incident">RCA Template (fill during
+the incident)</h2>
+<pre class="text"><code>Summary:
+  One-line impact + duration + blast radius.
+
+Timeline (UTC):
+  - T0: Detection (who/what)
+  - T+X: User impact confirmed
+  - T+Y: Mitigation started
+  - T+Z: Mitigation complete
+  - T+…: Verification and monitoring checks
+
+Impact:
+  - Users affected (%/regions/tenants)
+  - Services/components affected
+  - SLO/SLA breach? (y/n)
+
+Signals:
+  - Alerts fired (names, thresholds)
+  - Key metrics (latency, errors, saturation)
+  - Logs/snippets (links)
+
+Hypotheses (ranked):
+  1) ...
+  2) ...
+  3) ...
+
+Tests/Experiments:
+  - What to run, expected vs observed, results
+
+Mitigations:
+  - Immediate: traffic shift, feature flag, rollback, scale up/down
+  - Permanent (planned): config fix, code change, infra change
+
+Decisions &amp; Owners:
+  - Decision, who approved, timestamp
+
+Root Cause:
+  - Direct cause
+  - Contributing factors
+  - Control gaps (missing alert, missing guardrail)
+
+Lessons / Follow-ups:
+  - Action items (owner, due date, priority)
+  - Playbook updates needed?</code></pre>
+<hr />
+<h2 id="prioritization-rules-sregoogle-style">Prioritization Rules
+(SRE/Google-Style)</h2>
+<ul>
+<li><strong>Safety first</strong>: Stop the bleeding before root cause.
+Prefer rollback/traffic shift over risky fixes.</li>
+<li><strong>Stabilize service</strong>: Protect user experience and data
+integrity; avoid data-destructive actions.</li>
+<li><strong>Blast radius awareness</strong>: Prefer surgical mitigations
+(per-tenant, per-az) before global changes.</li>
+<li><strong>Time-bounded experiments</strong>: Set a timer; if no
+improvement, roll back and reassess.</li>
+<li><strong>Single change at a time</strong>: Avoid multiple concurrent
+fixes that mask the true cause.</li>
+<li><strong>Evidence over intuition</strong>: Promote hypotheses only
+with data (metrics/logs/traces).</li>
+<li><strong>Repro or correlate</strong>: Correlate with recent deploys,
+config changes, infra events, traffic patterns.</li>
+<li><strong>Guardrails</strong>: Require peer ack for prod-impacting
+actions (db schema, firewall, auth).</li>
+</ul>
+<hr />
+<h2 id="how-to-choose-priorities-fast-triage">How to Choose Priorities
+(fast triage)</h2>
+<ol type="1">
+<li><strong>User harm &amp; data risk</strong>: data loss/corruption
+&gt; auth failures &gt; availability &gt; latency &gt;
+degradation.<br />
+</li>
+<li><strong>Breadth of impact</strong>: multi-region &gt; single AZ &gt;
+single tenant.<br />
+</li>
+<li><strong>Time sensitivity</strong>: regulatory/finance windows,
+partner SLAs, batch deadlines.<br />
+</li>
+<li><strong>Reversibility</strong>: reversible mitigations first
+(rollback, disable feature flag, traffic split).<br />
+</li>
+<li><strong>Detectability</strong>: actions with clear, rapid feedback
+take precedence.</li>
+</ol>
+<hr />
+<h2 id="scenarios-example-rcas">Scenarios &amp; Example RCAs</h2>
+<h3 id="api-latency-regression-post-deploy">1) API Latency Regression
+Post-Deploy</h3>
+<p><strong>Context</strong>: p95 latency +80% in 10 minutes after
+release.<br />
+<strong>Hypotheses</strong>: bad feature flag path, thread pool
+starvation, downstream 429s.<br />
+<strong>Tests</strong>: - Compare metrics pre/post deploy (latency,
+saturation, error rate).<br />
+- Toggle flag off for 10% traffic; observe metrics.<br />
+- Increase pool size temporarily; check thread rejection.<br />
+<strong>Mitigation</strong>: Roll back to previous image; disable new
+flag.<br />
+<strong>Root cause</strong>: Feature flag enabled sync call to
+downstream without timeout; thread pool exhausted.<br />
+<strong>Follow-ups</strong>: Add timeout + circuit breaker; load test
+flag path; alert on queue depth.</p>
+<h3 id="kafka-consumer-lag-spike">2) Kafka Consumer Lag Spike</h3>
+<p><strong>Context</strong>: Lag jumps to 200k after schema
+deployment.<br />
+<strong>Hypotheses</strong>: deserialization failures causing retries;
+partition skew; throttling.<br />
+<strong>Tests</strong>: -
+<code>kafka-consumer-groups.sh --describe --group &lt;g&gt;</code><br />
+- Check consumer error logs for <code>UnknownMagicByte</code> or schema
+ID mismatch.<br />
+- Verify partition assignment strategy and max.poll.interval.<br />
+<strong>Mitigation</strong>: Roll back consumer build; pin schema ID;
+rebalance partitions.<br />
+<strong>Root cause</strong>: Producer deployed with new schema without
+backward compatibility; consumers on older schema failed
+deserialization.<br />
+<strong>Follow-ups</strong>: Enforce registry compatibility = BACKWARD;
+add pre-deploy contract tests.</p>
+<h3 id="database-connection-storm">3) Database Connection Storm</h3>
+<p><strong>Context</strong>: Error rate spikes, DB CPU at 95%,
+connection count maxed.<br />
+<strong>Hypotheses</strong>: connection pool leak, sudden traffic shift,
+liveness probe retry storm.<br />
+<strong>Tests</strong>: - App pool metrics vs DB connections; check
+liveness/readiness probe frequency.<br />
+- DB slowlog/pg_stat_activity for autovacuum locks/long
+transactions.<br />
+- Traffic routing changes (ingress/feature flag).<br />
+<strong>Mitigation</strong>: Reduce pod count or pool size; apply
+connection limit per pod; temporarily scale DB read replicas.<br />
+<strong>Root cause</strong>: New pod autoscaler rule doubled pods
+without reducing pool size; DB hit max connections.<br />
+<strong>Follow-ups</strong>: Pool per-core sizing; admission checks for
+pool size; SLO alert on connection utilization.</p>
+<h3 id="regional-outage-dependency-failure">4) Regional Outage /
+Dependency Failure</h3>
+<p><strong>Context</strong>: Upstream DNS or cloud service failure in a
+region.<br />
+<strong>Hypotheses</strong>: bad resolver, provider incident, route
+table change.<br />
+<strong>Tests</strong>: - <code>dig @resolver service.</code> across
+regions; traceroute to upstream.<br />
+- Check status page and own synthetic probes.<br />
+- Validate failover policies (GSLB/ingress weights).<br />
+<strong>Mitigation</strong>: Shift traffic to healthy regions; disable
+failing upstream in routing; extend client timeouts.<br />
+<strong>Root cause</strong>: External provider DNS outage; failover
+policy not triggered due to missing health check.<br />
+<strong>Follow-ups</strong>: Add active health checks to GSLB; drill
+failover; set TTL caps.</p>
+<hr />
+<h2 id="quick-commands-links-to-capture-evidence">Quick Commands &amp;
+Links to Capture Evidence</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Kubernetes rollout + events</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> get deploy <span class="at">-A</span> <span class="at">--show-labels</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> describe pod <span class="op">&lt;</span>pod<span class="op">&gt;</span> -n <span class="op">&lt;</span>ns<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-n</span> <span class="st">&#39;/Events/,$p&#39;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare configs between revisions (git)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff HEAD~1..HEAD <span class="at">--</span> path/to/configs</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Logs with correlation IDs</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs deploy/<span class="op">&lt;</span>svc<span class="op">&gt;</span> -n <span class="op">&lt;</span>ns<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="op">&lt;</span>request-id<span class="op">&gt;</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-50</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># System health snapshot</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">uptime</span><span class="kw">;</span> <span class="fu">free</span> <span class="at">-m</span><span class="kw">;</span> <span class="fu">df</span> <span class="at">-h</span><span class="kw">;</span> <span class="fu">vmstat</span> 1 5</span></code></pre></div>
+<hr />
+<h2 id="postmortem-essentials-after-mitigation">Postmortem Essentials
+(after mitigation)</h2>
+<ul>
+<li><strong>Timeline accuracy</strong>: Convert all times to UTC; verify
+from logs/metrics.<br />
+</li>
+<li><strong>Single root cause with contributing factors</strong>: avoid
+laundry lists.<br />
+</li>
+<li><strong>Action items</strong>: owner + due date + severity; include
+tests/automation to prevent recurrence.<br />
+</li>
+<li><strong>Share back</strong>: update runbooks; add checks to CI/CD
+(lint configs, contracts, chaos drills).</li>
+</ul>
+
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }).catch(() => {
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            });
+
+            block.appendChild(button);
+        });
+    </script>
+</body>
+</html>

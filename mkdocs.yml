@@ -14,16 +14,21 @@ nav:
       - EKS Production Guide: production-debugging-eks.html
   - Operating Systems:
       - Unix/Linux Debugging: production-debugging-unix-linux.html
+      - Linux Internals: linux-internals.html
   - Networking:
       - Network Debugging: production-networking-debugging.html
   - CI/CD:
       - CI/CD Tools & Platforms: production-debugging-ci-cd-tools.html
+      - CI/CD Pipeline Templates: cicd-pipeline-templates.html
   - Cloud & Infrastructure:
       - IAM & Access Control: production-debugging-iam.html
+      - Kafka Debugging: kafka-debugging.html
   - Databases:
       - MySQL & PostgreSQL: production-debugging-databases.html
   - Tools & Resources:
       - Essential Tools Guide: TOOLS_GUIDE.html
+      - Python Automation & Debugging: python-debugging-libs.html
+      - Root Cause Analysis Playbook: root-cause-analysis.html
 
 theme:
   name: material

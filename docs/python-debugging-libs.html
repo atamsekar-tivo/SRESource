@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Debugging Libs</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <h1>Python Debugging Libs</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                <ul><li><a href="#fast-reference">Fast Reference</a></li>
+<li><a href="#httpx-prod-safe-http-client">httpx (Prod-Safe HTTP Client)</a></li>
+<li><a href="#boto3-aws-automation">boto3 (AWS Automation)</a></li>
+<li><a href="#kubernetes-api-client">kubernetes API client</a></li>
+<li><a href="#paramiko-fabric-ssh-automation">paramiko + fabric (SSH
+Automation)</a></li>
+<li><a href="#aiohttp-asyncio-concurrent-health-checks">aiohttp + asyncio
+(Concurrent Health Checks)</a></li>
+<li><a href="#tenacity-retries">tenacity (Retries)</a></li>
+<li><a href="#psutil-host-process-telemetry">psutil (Host &amp; Process
+Telemetry)</a></li>
+<li><a href="#pexpect-automate-interactive-clis">pexpect (Automate Interactive
+CLIs)</a></li>
+<li><a href="#dnspython-dns-debug">dnspython (DNS Debug)</a></li>
+<li><a href="#prometheus_client-exporter">prometheus_client (Exporter)</a></li>
+<li><a href="#typer-production-cli">typer (Production CLI)</a></li>
+<li><a href="#pydantic-validated-config">pydantic (Validated Config)</a></li>
+<li><a href="#rich-operator-output">rich (Operator Output)</a></li>
+<li style="margin-left: 20px;"><a href="#faang-level-practices-apply-across-libraries">FAANG-Level
+Practices (apply across libraries)</a></li></ul>
+            </nav>
+            <main>
+                
+<blockquote>
+<p><strong>Use case</strong>: Rapidly debug, automate, and observe
+infrastructure with production-safe patterns (timeouts, retries, auth,
+structured logs, metrics).</p>
+</blockquote>
+<hr />
+<h2 id="fast-reference">Fast Reference</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Library</th>
+<th>Primary Uses</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>httpx</code></td>
+<td>HTTP APIs with timeouts/retries/HTTP2</td>
+<td><a href="#httpx-prod-safe-http-client">snippet</a></td>
+</tr>
+<tr>
+<td><code>boto3</code></td>
+<td>AWS automation (EC2, S3, IAM, STS)</td>
+<td><a href="#boto3-aws-automation">snippet</a></td>
+</tr>
+<tr>
+<td><code>kubernetes</code></td>
+<td>Cluster CRUD, logs, exec, events</td>
+<td><a href="#kubernetes-api-client">snippet</a></td>
+</tr>
+<tr>
+<td><code>paramiko</code> + <code>fabric</code></td>
+<td>SSH automation with sudo, file push/pull</td>
+<td><a href="#paramiko--fabric-ssh-automation">snippet</a></td>
+</tr>
+<tr>
+<td><code>aiohttp</code> + <code>asyncio</code></td>
+<td>Concurrent I/O for fleet checks</td>
+<td><a
+href="#aiohttp--asyncio-concurrent-health-checks">snippet</a></td>
+</tr>
+<tr>
+<td><code>tenacity</code></td>
+<td>Resilient retries with backoff/jitter</td>
+<td><a href="#tenacity-retries">snippet</a></td>
+</tr>
+<tr>
+<td><code>psutil</code></td>
+<td>Host/process metrics (CPU, mem, I/O, fds)</td>
+<td><a href="#psutil-host--process-telemetry">snippet</a></td>
+</tr>
+<tr>
+<td><code>pexpect</code></td>
+<td>Automate interactive CLIs (kubectl, mysql)</td>
+<td><a href="#pexpect-automate-interactive-clis">snippet</a></td>
+</tr>
+<tr>
+<td><code>dnspython</code></td>
+<td>DNS diag (A/AAAA/SRV/CAA, tracing)</td>
+<td><a href="#dnspython-dns-debug">snippet</a></td>
+</tr>
+<tr>
+<td><code>prometheus_client</code></td>
+<td>Expose metrics for scripts/agents</td>
+<td><a href="#prometheus_client-exporter">snippet</a></td>
+</tr>
+<tr>
+<td><code>typer</code></td>
+<td>Typed CLIs (arg parsing + help)</td>
+<td><a href="#typer-production-cli">snippet</a></td>
+</tr>
+<tr>
+<td><code>pydantic</code></td>
+<td>Config validation from env/JSON</td>
+<td><a href="#pydantic-validated-config">snippet</a></td>
+</tr>
+<tr>
+<td><code>rich</code></td>
+<td>Structured logs/tables for operators</td>
+<td><a href="#rich-operator-output">snippet</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="httpx-prod-safe-http-client">httpx (Prod-Safe HTTP Client)</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> httpx</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tenacity <span class="im">import</span> retry, stop_after_attempt, wait_exponential, retry_if_exception_type</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">@retry</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    stop<span class="op">=</span>stop_after_attempt(<span class="dv">4</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    wait<span class="op">=</span>wait_exponential(multiplier<span class="op">=</span><span class="fl">0.2</span>, <span class="bu">max</span><span class="op">=</span><span class="dv">2</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    retry<span class="op">=</span>retry_if_exception_type(httpx.HTTPError),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_json(url: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> httpx.Client(timeout<span class="op">=</span>httpx.Timeout(<span class="fl">2.0</span>, read<span class="op">=</span><span class="fl">3.0</span>), http2<span class="op">=</span><span class="va">True</span>) <span class="im">as</span> client:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        r <span class="op">=</span> client.get(url, follow_redirects<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        r.raise_for_status()</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> r.json()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>resp <span class="op">=</span> get_json(<span class="st">&quot;https://status.example.com/health&quot;</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(resp)</span></code></pre></div>
+<hr />
+<h2 id="boto3-aws-automation">boto3 (AWS Automation)</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> boto3</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> botocore.config <span class="im">import</span> Config</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> Config(retries<span class="op">=</span>{<span class="st">&quot;max_attempts&quot;</span>: <span class="dv">5</span>, <span class="st">&quot;mode&quot;</span>: <span class="st">&quot;adaptive&quot;</span>}, region_name<span class="op">=</span><span class="st">&quot;us-west-2&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ec2 <span class="op">=</span> boto3.client(<span class="st">&quot;ec2&quot;</span>, config<span class="op">=</span>cfg)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>resp <span class="op">=</span> ec2.describe_instances(</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    Filters<span class="op">=</span>[{<span class="st">&quot;Name&quot;</span>: <span class="st">&quot;tag:Role&quot;</span>, <span class="st">&quot;Values&quot;</span>: [<span class="st">&quot;frontend&quot;</span>]}, {<span class="st">&quot;Name&quot;</span>: <span class="st">&quot;instance-state-name&quot;</span>, <span class="st">&quot;Values&quot;</span>: [<span class="st">&quot;running&quot;</span>]}]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>instances <span class="op">=</span> [i[<span class="st">&quot;InstanceId&quot;</span>] <span class="cf">for</span> r <span class="kw">in</span> resp[<span class="st">&quot;Reservations&quot;</span>] <span class="cf">for</span> i <span class="kw">in</span> r[<span class="st">&quot;Instances&quot;</span>]]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Running:&quot;</span>, instances)</span></code></pre></div>
+<hr />
+<h2 id="kubernetes-api-client">kubernetes API client</h2>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kubernetes <span class="im">import</span> client, config</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>config.load_kube_config()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>core <span class="op">=</span> client.CoreV1Api()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>pods <span class="op">=</span> core.list_namespaced_pod(<span class="st">&quot;default&quot;</span>, label_selector<span class="op">=</span><span class="st">&quot;app=sresource&quot;</span>).items</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pod <span class="kw">in</span> pods:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(pod.metadata.name, pod.status.phase)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>log <span class="op">=</span> core.read_namespaced_pod_log(pod.metadata.name, <span class="st">&quot;default&quot;</span>, tail_lines<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;--- tail ---&quot;</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(log)</span></code></pre></div>
+<hr />
+<h2 id="paramiko-fabric-ssh-automation">paramiko + fabric (SSH
+Automation)</h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fabric <span class="im">import</span> Connection</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>hosts <span class="op">=</span> [<span class="st">&quot;web1&quot;</span>, <span class="st">&quot;web2&quot;</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> host <span class="kw">in</span> hosts:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> Connection(host<span class="op">=</span>host, user<span class="op">=</span><span class="st">&quot;ops&quot;</span>, connect_timeout<span class="op">=</span><span class="dv">5</span>) <span class="im">as</span> c:</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        c.run(<span class="st">&quot;sudo systemctl status nginx --no-pager&quot;</span>, hide<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        c.put(<span class="st">&quot;site.conf&quot;</span>, <span class="st">&quot;/tmp/site.conf&quot;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        c.sudo(<span class="st">&quot;mv /tmp/site.conf /etc/nginx/conf.d/site.conf &amp;&amp; systemctl reload nginx&quot;</span>)</span></code></pre></div>
+<hr />
+<h2 id="aiohttp-asyncio-concurrent-health-checks">aiohttp + asyncio
+(Concurrent Health Checks)</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> asyncio</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> aiohttp</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>services <span class="op">=</span> [<span class="st">&quot;https://svc-a/healthz&quot;</span>, <span class="st">&quot;https://svc-b/healthz&quot;</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> check(url):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    timeout <span class="op">=</span> aiohttp.ClientTimeout(total<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="cf">with</span> aiohttp.ClientSession(timeout<span class="op">=</span>timeout) <span class="im">as</span> session:</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">async</span> <span class="cf">with</span> session.get(url, ssl<span class="op">=</span><span class="va">False</span>) <span class="im">as</span> resp:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            body <span class="op">=</span> <span class="cf">await</span> resp.text()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> url, resp.status, body[:<span class="dv">120</span>]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> main():</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> <span class="cf">await</span> asyncio.gather(<span class="op">*</span>(check(u) <span class="cf">for</span> u <span class="kw">in</span> services), return_exceptions<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> results:</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(r)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>asyncio.run(main())</span></code></pre></div>
+<hr />
+<h2 id="tenacity-retries">tenacity (Retries)</h2>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tenacity <span class="im">import</span> retry, wait_exponential, stop_after_attempt</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">@retry</span>(wait<span class="op">=</span>wait_exponential(multiplier<span class="op">=</span><span class="fl">0.1</span>, <span class="bu">max</span><span class="op">=</span><span class="fl">1.5</span>), stop<span class="op">=</span>stop_after_attempt(<span class="dv">5</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flaky():</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    ...</span></code></pre></div>
+<hr />
+<h2 id="psutil-host-process-telemetry">psutil (Host &amp; Process
+Telemetry)</h2>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> psutil</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;CPU%&quot;</span>, psutil.cpu_percent(interval<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Mem&quot;</span>, psutil.virtual_memory())</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p <span class="kw">in</span> psutil.process_iter([<span class="st">&quot;pid&quot;</span>, <span class="st">&quot;name&quot;</span>, <span class="st">&quot;cpu_percent&quot;</span>, <span class="st">&quot;num_fds&quot;</span>]):</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p.info[<span class="st">&quot;cpu_percent&quot;</span>] <span class="op">&gt;</span> <span class="dv">50</span>:</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(p.info)</span></code></pre></div>
+<hr />
+<h2 id="pexpect-automate-interactive-clis">pexpect (Automate Interactive
+CLIs)</h2>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pexpect</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>child <span class="op">=</span> pexpect.spawn(<span class="st">&quot;ssh ops@db1&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>child.expect(<span class="st">&quot;password:&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>child.sendline(<span class="st">&quot;REDACTED&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>child.expect(<span class="vs">r&quot;</span><span class="ch">\$</span><span class="vs"> &quot;</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>child.sendline(<span class="st">&quot;mysql -e &#39;SHOW PROCESSLIST;&#39;&quot;</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>child.expect(<span class="vs">r&quot;</span><span class="ch">\$</span><span class="vs"> &quot;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(child.before.decode())</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>child.sendline(<span class="st">&quot;exit&quot;</span>)</span></code></pre></div>
+<hr />
+<h2 id="dnspython-dns-debug">dnspython (DNS Debug)</h2>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dns.resolver</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>resolver <span class="op">=</span> dns.resolver.Resolver()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>resolver.timeout <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>resolver.lifetime <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> qtype <span class="kw">in</span> [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;AAAA&quot;</span>, <span class="st">&quot;CAA&quot;</span>, <span class="st">&quot;SRV&quot;</span>, <span class="st">&quot;TXT&quot;</span>]:</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        answers <span class="op">=</span> resolver.resolve(<span class="st">&quot;api.example.com&quot;</span>, qtype)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(qtype, [r.to_text() <span class="cf">for</span> r <span class="kw">in</span> answers])</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(qtype, <span class="st">&quot;error&quot;</span>, e)</span></code></pre></div>
+<hr />
+<h2 id="prometheus_client-exporter">prometheus_client (Exporter)</h2>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> prometheus_client <span class="im">import</span> start_http_server, Gauge</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>queue_depth <span class="op">=</span> Gauge(<span class="st">&quot;job_queue_depth&quot;</span>, <span class="st">&quot;Jobs waiting&quot;</span>, [<span class="st">&quot;queue&quot;</span>])</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    start_http_server(<span class="dv">9100</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        queue_depth.labels(<span class="st">&quot;ingest&quot;</span>).<span class="bu">set</span>(<span class="dv">42</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        time.sleep(<span class="dv">5</span>)</span></code></pre></div>
+<hr />
+<h2 id="typer-production-cli">typer (Production CLI)</h2>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> typer</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rich.console <span class="im">import</span> Console</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> typer.Typer()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>log <span class="op">=</span> Console().log</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="at">@app.command</span>()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> logs(namespace: <span class="bu">str</span> <span class="op">=</span> <span class="st">&quot;default&quot;</span>):</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    log(<span class="ss">f&quot;Fetching logs from </span><span class="sc">{</span>namespace<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># call kubernetes client here</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    app()</span></code></pre></div>
+<hr />
+<h2 id="pydantic-validated-config">pydantic (Validated Config)</h2>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, AnyUrl, Field</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os, json</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Settings(BaseModel):</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    api_url: AnyUrl</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    timeout: <span class="bu">float</span> <span class="op">=</span> Field(ge<span class="op">=</span><span class="fl">0.1</span>, le<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    kubeconfig: <span class="bu">str</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> json.loads(os.environ[<span class="st">&quot;APP_CONFIG&quot;</span>])</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> Settings(<span class="op">**</span>data)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cfg)</span></code></pre></div>
+<hr />
+<h2 id="rich-operator-output">rich (Operator Output)</h2>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rich.table <span class="im">import</span> Table</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rich.console <span class="im">import</span> Console</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>table <span class="op">=</span> Table(title<span class="op">=</span><span class="st">&quot;Service Health&quot;</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>table.add_column(<span class="st">&quot;Service&quot;</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>table.add_column(<span class="st">&quot;Status&quot;</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>table.add_column(<span class="st">&quot;Latency (ms)&quot;</span>, justify<span class="op">=</span><span class="st">&quot;right&quot;</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>table.add_row(<span class="st">&quot;auth&quot;</span>, <span class="st">&quot;OK&quot;</span>, <span class="st">&quot;42&quot;</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>table.add_row(<span class="st">&quot;payments&quot;</span>, <span class="st">&quot;WARN&quot;</span>, <span class="st">&quot;210&quot;</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>Console().<span class="bu">print</span>(table)</span></code></pre></div>
+<hr />
+<h3 id="faang-level-practices-apply-across-libraries">FAANG-Level
+Practices (apply across libraries)</h3>
+<ul>
+<li><strong>Timeouts + retries</strong>: never call a network API
+without both (httpx/boto3/k8s client config).<br />
+</li>
+<li><strong>Structured logging + redaction</strong>: use
+<code>rich</code> or <code>json</code> logs; never print secrets.<br />
+</li>
+<li><strong>Auth profiles</strong>: support AWS/GCP workload identity,
+kube in-cluster config, and env overrides.<br />
+</li>
+<li><strong>Backpressure and limits</strong>: cap concurrency
+(<code>asyncio.Semaphore</code>), rate-limit AWS/k8s calls.<br />
+</li>
+<li><strong>Idempotency</strong>: design operations to be safe on retry;
+use request IDs.<br />
+</li>
+<li><strong>Observability</strong>: emit Prometheus metrics and traces
+(e.g., <code>opentelemetry</code> if needed).<br />
+</li>
+<li><strong>Validation</strong>: validate configs with
+<code>pydantic</code>; fail fast on bad inputs.<br />
+</li>
+<li><strong>Security</strong>: prefer least-privilege IAM/service
+accounts; ssh via bastions; avoid long-lived keys.</li>
+</ul>
+
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }).catch(() => {
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            });
+
+            block.appendChild(button);
+        });
+    </script>
+</body>
+</html>

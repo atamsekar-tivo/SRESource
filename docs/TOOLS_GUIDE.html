@@ -3,272 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Essential</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.8;
-            color: #333;
-            background-color: #f5f5f5;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
-            padding: 20px;
-        }
-        
-        nav {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-        
-        nav h2 {
-            font-size: 1em;
-            color: #1976D2;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #2196F3;
-            padding-bottom: 10px;
-        }
-        
-        nav ul {
-            list-style: none;
-        }
-        
-        nav li {
-            margin-bottom: 5px;
-        }
-        
-        nav a {
-            color: #2196F3;
-            text-decoration: none;
-            font-size: 0.9em;
-            display: block;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-        
-        nav a:hover {
-            background: #f0f0f0;
-            transform: translateX(5px);
-        }
-        
-        main {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        h1 {
-            color: #1976D2;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #2196F3;
-        }
-        
-        h2 {
-            color: #1976D2;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        
-        h3 {
-            color: #2196F3;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        
-        p {
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-        
-        code {
-            background: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            color: #d63384;
-        }
-        
-        pre {
-            background: #1e1e1e;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 15px 0;
-            border-left: 3px solid #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-        
-        pre code {
-            background: transparent;
-            color: #00ff00;
-            padding: 0;
-            border-radius: 0;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        
-        th {
-            background: #2196F3;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        tbody tr:hover {
-            background: #f5f5f5;
-        }
-        
-        ul, ol {
-            margin-left: 30px;
-            margin-bottom: 15px;
-        }
-        
-        li {
-            margin-bottom: 8px;
-        }
-        
-        blockquote {
-            border-left: 4px solid #2196F3;
-            padding-left: 15px;
-            margin: 15px 0;
-            color: #666;
-        }
-        
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .back-link:hover {
-            background: #1976D2;
-        }
-        
-        .toc {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        
-        .toc ul {
-            margin-left: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-            
-            nav {
-                position: relative;
-                top: 0;
-            }
-        }
-    </style>
+    <title>Tools_Guide</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <h2>Contents</h2>
-            <ul><li><a href="#linuxunix-system-tools">Linux/Unix System Tools</a></li>
+    <div class="page">
+        <header>
+            <h1>Tools_Guide</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                <ul><li><a href="#linuxunix-system-tools">Linux/Unix System Tools</a></li>
+<li><a href="#container-and-docker-tools">Container and Docker Tools</a></li>
+<li><a href="#kubernetes-essential-tools">Kubernetes Essential Tools</a></li>
+<li><a href="#monitoring-observability-and-alerting">Monitoring,
+Observability, and Alerting</a></li>
+<li><a href="#cicd-and-automation">CI/CD and Automation</a></li>
+<li><a href="#infrastructure-as-code-and-configuration-management">Infrastructure
+as Code and Configuration Management</a></li>
+<li><a href="#security-and-compliance-tools">Security and Compliance
+Tools</a></li>
+<li><a href="#database-tools">Database Tools</a></li>
+<li><a href="#performance-and-profiling-tools">Performance and Profiling
+Tools</a></li>
+<li><a href="#incident-management-and-on-call">Incident Management and
+On-Call</a></li>
+<li><a href="#development-and-debugging-tools">Development and Debugging
+Tools</a></li>
+<li><a href="#cloud-platform-specific-tools">Cloud Platform-Specific
+Tools</a></li>
+<li><a href="#documentation-and-knowledge-management">Documentation and
+Knowledge Management</a></li>
+<li><a href="#testing-and-quality-assurance">Testing and Quality
+Assurance</a></li>
+<li><a href="#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
+<li><a href="#essential-scripts-and-command-line-utilities">Essential Scripts
+and Command-Line Utilities</a></li>
+<li><a href="#tool-selection-matrix">Tool Selection Matrix</a></li>
+<li><a href="#implementation-quick-start">Implementation Quick Start</a></li>
+<li><a href="#tool-maintenance-and-updates">Tool Maintenance and Updates</a></li>
+<li><a href="#community-resources">Community Resources</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools">Recommended Tools</a></li>
-<li><a href="#container-and-docker-tools">Container and Docker Tools</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-1">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-1">Recommended Tools</a></li>
-<li><a href="#kubernetes-essential-tools">Kubernetes Essential Tools</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-2">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-2">Recommended Tools</a></li>
-<li><a href="#monitoring-observability-and-alerting">Monitoring,</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-3">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-3">Recommended Tools</a></li>
-<li><a href="#cicd-and-automation">CI/CD and Automation</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-4">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-4">Recommended Tools</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-5">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-5">Recommended Tools</a></li>
-<li><a href="#security-and-compliance-tools">Security and Compliance</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-6">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-6">Recommended Tools</a></li>
-<li><a href="#database-tools">Database Tools</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-7">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-7">Recommended Tools</a></li>
-<li><a href="#performance-and-profiling-tools">Performance and Profiling</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-8">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-8">Recommended Tools</a></li>
-<li><a href="#incident-management-and-on-call">Incident Management and</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-9">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-9">Recommended Tools</a></li>
-<li><a href="#development-and-debugging-tools">Development and Debugging</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-10">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-10">Recommended Tools</a></li>
-<li><a href="#cloud-platform-specific-tools">Cloud Platform-Specific</a></li>
 <li style="margin-left: 20px;"><a href="#aws-tools">AWS Tools</a></li>
 <li style="margin-left: 20px;"><a href="#gcp-tools">GCP Tools</a></li>
 <li style="margin-left: 20px;"><a href="#azure-tools">Azure Tools</a></li>
-<li><a href="#documentation-and-knowledge-management">Documentation and</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-11">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-11">Recommended Tools</a></li>
-<li><a href="#testing-and-quality-assurance">Testing and Quality</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-12">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-12">Recommended Tools</a></li>
-<li><a href="#backup-and-disaster-recovery">Backup and Disaster Recovery</a></li>
 <li style="margin-left: 20px;"><a href="#must-have-tools-13">Must-Have Tools</a></li>
 <li style="margin-left: 20px;"><a href="#recommended-tools-13">Recommended Tools</a></li>
-<li><a href="#essential-scripts-and-command-line-utilities">Essential Scripts</a></li>
-<li style="margin-left: 20px;"><a href="#must-have-one-liners-and-scripts">Must-Have One-Liners and</a></li>
-<li><a href="#tool-selection-matrix">Tool Selection Matrix</a></li>
+<li style="margin-left: 20px;"><a href="#must-have-one-liners-and-scripts">Must-Have One-Liners and
+Scripts</a></li>
 <li style="margin-left: 20px;"><a href="#by-team-size-and-maturity">By Team Size and Maturity</a></li>
-<li><a href="#implementation-quick-start">Implementation Quick Start</a></li>
 <li style="margin-left: 20px;"><a href="#week-1-foundation">Week 1: Foundation</a></li>
 <li style="margin-left: 20px;"><a href="#week-2-3-monitoring">Week 2-3: Monitoring</a></li>
 <li style="margin-left: 20px;"><a href="#week-4-advanced">Week 4+: Advanced</a></li>
-<li><a href="#tool-maintenance-and-updates">Tool Maintenance and Updates</a></li>
-<li style="margin-left: 20px;"><a href="#recommended-update-schedule">Recommended Update Schedule</a></li>
-<li><a href="#community-resources">Community Resources</a></li></ul>
-        </nav>
-        <main>
-            <h1 id="essential-sredevopsplatform-engineer-tools-guide">Essential
-SRE/DevOps/Platform Engineer Tools Guide</h1>
+<li style="margin-left: 20px;"><a href="#recommended-update-schedule">Recommended Update Schedule</a></li></ul>
+            </nav>
+            <main>
+                
 <blockquote>
 <p><strong>Purpose</strong>: Curated list of production-grade tools used
 by high-performing engineering teams at FAANG and scale-up companies.
@@ -3402,8 +3228,40 @@ https://registry.terraform.io/</li>
 <strong>Focus</strong>: Production-ready, FAANG-level teams<br />
 <strong>Maintenance</strong>: Verified quarterly</p>
 
-            <a href="/index.html" class="back-link">← Back to Home</a>
-        </main>
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
     </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }).catch(() => {
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            });
+
+            block.appendChild(button);
+        });
+    </script>
 </body>
 </html>

@@ -29,7 +29,7 @@ spec:
       
       containers:
       - name: sresource
-        image: atamsekar/sresource:latest
+        image: sresource:latest
         imagePullPolicy: IfNotPresent
         
         ports:
@@ -40,13 +40,15 @@ spec:
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
+        - name: FLASK_ENV
+          value: "production"
         
         resources:
           requests:
             memory: "128Mi"
             cpu: "100m"
           limits:
-            memory: "256Mi"
+            memory: "512Mi"
             cpu: "500m"
         
         livenessProbe:

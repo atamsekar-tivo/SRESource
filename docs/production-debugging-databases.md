@@ -1492,6 +1492,88 @@ jmeter -n -t test.jmx -l results.jtl
 
 ---
 
+## Database Internals: Must-Know Commands (Prod Safe Defaults)
+
+### MySQL InnoDB + Performance Schema
+
+```bash
+# Top statements by total time (Performance Schema)
+mysql -e "SELECT digest_text, ROUND(SUM_TIMER_WAIT/1e6,2) AS total_ms, COUNT_STAR AS execs \
+FROM performance_schema.events_statements_summary_by_digest \
+ORDER BY SUM_TIMER_WAIT DESC LIMIT 10\G"
+
+# Current locks / blockers
+mysql -e "SHOW ENGINE INNODB STATUS\G" | egrep -i "LATEST DETECTED DEADLOCK|WAITING|WE ROLL BACK"
+
+# Thread + connection pressure
+mysql -e "SHOW GLOBAL STATUS WHERE Variable_name IN ('Threads_running','Threads_connected','Max_used_connections')\G"
+
+# Replication health (primary/replica)
+mysql -e "SHOW REPLICA STATUS\G"  # MySQL 8+
+# Legacy:
+mysql -e "SHOW SLAVE STATUS\G"
+
+# Binary log retention + size
+mysql -e "SHOW BINARY LOGS;"
+mysql -e "SHOW VARIABLES LIKE 'binlog_expire_logs_seconds';"
+```
+
+### PostgreSQL Internals (pg_stat*)
+
+```bash
+# Long-running + blocked queries
+psql -c "SELECT pid, now()-query_start AS runtime, wait_event_type, wait_event, state, query \
+FROM pg_stat_activity WHERE state <> 'idle' ORDER BY runtime DESC LIMIT 15;"
+
+# Lock graph (who blocks whom)
+psql -c "SELECT bl.pid AS blocked_pid, a.usename AS blocked_user, kl.pid AS blocking_pid, ka.query AS blocking_query \
+FROM pg_locks bl JOIN pg_stat_activity a ON bl.pid = a.pid \
+JOIN pg_locks kl ON bl.locktype = kl.locktype AND bl.database = kl.database AND bl.relation = kl.relation AND bl.pid <> kl.pid \
+JOIN pg_stat_activity ka ON kl.pid = ka.pid WHERE NOT bl.granted;"
+
+# Statement stats (requires pg_stat_statements)
+psql -c "SELECT query, calls, total_time/1000 AS total_s, mean_time AS avg_ms \
+FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;"
+
+# WAL and replication lag
+psql -c "SELECT pg_size_pretty(pg_xlog_location_diff(pg_current_wal_lsn(), replay_lsn)) AS replication_lag \
+FROM pg_stat_replication;"
+psql -c "SELECT * FROM pg_stat_wal LIMIT 10;"
+
+# Buffer/cache pressure
+psql -c "SELECT checkpoints_req, buffers_checkpoint, buffers_clean, buffers_backend FROM pg_stat_bgwriter;"
+```
+
+### Performance-Safe EXPLAIN and Observability
+
+```bash
+# Postgres: execution plan with buffers
+psql -c "EXPLAIN (ANALYZE, BUFFERS) <QUERY>;"
+
+# MySQL: json format for clarity
+mysql -e "EXPLAIN FORMAT=JSON <QUERY>\G"
+
+# Capture query sample for offline review
+pt-query-digest /var/log/mysql/slow.log --output slowlog > /tmp/slowlog.digest
+```
+
+### Security + Hardening Checks
+
+```bash
+# MySQL: check users without passwords / with wildcard hosts
+mysql -e "SELECT user, host, plugin, password_last_changed FROM mysql.user WHERE authentication_string='';"
+mysql -e "SELECT user, host FROM mysql.user WHERE host = '%';"
+
+# Postgres: roles with superuser or replication
+psql -c "SELECT rolname, rolsuper, rolreplication FROM pg_roles WHERE rolsuper OR rolreplication;"
+
+# TLS / auth posture (MySQL example)
+mysql -e "SHOW VARIABLES LIKE 'require_secure_transport';"
+mysql -e "SHOW GLOBAL VARIABLES LIKE 'validate_password%';"
+```
+
+---
+
 ## Documentation and References
 
 **MySQL Official**

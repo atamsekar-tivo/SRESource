@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - SRESource{% endblock %}
+
+{% block content %}
+    {% if is_html %}
+        <div class="html-content">
+            {{ content | safe }}
+        </div>
+    {% else %}
+        <div class="markdown-content">
+            {{ content }}
+        </div>
+    {% endif %}
+{% endblock %}

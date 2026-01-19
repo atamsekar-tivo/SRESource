@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka Debugging</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="css/html-docs.css">
+    <link rel="stylesheet" href="css/pandoc-code.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <h1>Kafka Debugging</h1>
+            <p>SRESource — production-ready runbooks with copy-pasteable commands.</p>
+            <div class="meta">
+                <span class="pill">Commands First</span>
+                <span class="pill">Safe Defaults</span>
+                <span class="pill">Prod Ready</span>
+            </div>
+        </header>
+        <div class="layout">
+            <nav>
+                <h2>Contents</h2>
+                <ul><li><a href="#scenario-consumer-lag-spiking">Scenario: Consumer Lag
+Spiking</a></li>
+<li><a href="#scenario-producer-errors-timeouts">Scenario: Producer Errors /
+Timeouts</a></li>
+<li><a href="#scenario-unclean-leader-elections-isr-shrink">Scenario: Unclean
+Leader Elections / ISR Shrink</a></li>
+<li><a href="#scenario-schema-registry-serialization-failures">Scenario:
+Schema Registry / Serialization Failures</a></li>
+<li><a href="#scenario-topic-explosion-quota-pressure">Scenario: Topic
+Explosion / Quota Pressure</a></li>
+<li><a href="#incident-checklist-keep-handy">Incident Checklist (Keep
+Handy)</a></li>
+<li><a href="#quick-client-sanity-snippet-python-confluent-kafka">Quick Client
+Sanity Snippet (Python, confluent-kafka)</a></li></ul>
+            </nav>
+            <main>
+                
+<blockquote>
+<p><strong>Critical context</strong>: Start read-only (describe, list,
+offsets), capture metrics before changes, and coordinate with
+producers/consumers on version/serialization. Avoid deleting
+topics/consumer groups in production without business approval.</p>
+</blockquote>
+<hr />
+<h2 id="scenario-consumer-lag-spiking">Scenario: Consumer Lag
+Spiking</h2>
+<p><strong>Symptoms</strong>: Lag climbing, end-to-end latency growing,
+no recent deploy.<br />
+<strong>Likely causes</strong>: Slow processing, partition imbalance,
+consumer session timeouts, broker throttling (quota).</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Lag per group/topic/partition</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-consumer-groups.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --describe <span class="at">--group</span> <span class="op">&lt;</span>group<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check client-side metrics (Prometheus/JMX preferred)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> localhost:7071/metrics <span class="kw">|</span> <span class="fu">grep</span> kafka_consumer_lag</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Rebalance to fix partition skew (Kafka &gt;=2.4)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-reassign-partitions.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--execute</span> <span class="at">--reassignment-json-file</span> reassign.json</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate max.poll.interval.ms vs processing time (Java client)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> max.poll.interval.ms client.properties</span></code></pre></div>
+<p>Remediations: - Increase consumer parallelism (more instances) or
+partitions; ensure balanced assignment strategy (<code>range</code> vs
+<code>cooperative-sticky</code>).<br />
+- Tune <code>max.poll.interval.ms</code>,
+<code>max.partition.fetch.bytes</code>, <code>fetch.max.bytes</code> to
+match payload size/latency.<br />
+- Verify quotas:
+<code>kafka-configs.sh --bootstrap-server &lt;broker:9092&gt; --describe --entity-type clients</code>.</p>
+<hr />
+<h2 id="scenario-producer-errors-timeouts">Scenario: Producer Errors /
+Timeouts</h2>
+<p><strong>Symptoms</strong>: <code>TimeoutException</code>,
+<code>RecordTooLargeException</code>, increased retries.<br />
+<strong>Likely causes</strong>: Broker throttle, batch.size too
+small/large, lingering DNS or TLS errors.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Broker-side request/response latency (JMX/metrics recommended)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> localhost:7071/metrics <span class="kw">|</span> <span class="fu">grep</span> kafka_network_RequestMetrics</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check max message size (broker + topic)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-configs.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --describe <span class="at">--entity-type</span> topics <span class="at">--entity-name</span> <span class="op">&lt;</span>topic<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> max.message.bytes</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-configs.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --describe <span class="at">--entity-type</span> brokers <span class="dt">\</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> message.max.bytes</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Client config sanity (Java)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;compression.type|max.in.flight.requests.per.connection|linger.ms|batch.size|acks&quot;</span> producer.properties</span></code></pre></div>
+<p>Remediations: - Align <code>message.max.bytes</code> (broker) and
+<code>max.request.size</code> (producer).<br />
+- For high throughput: use <code>acks=all</code>, <code>linger.ms</code>
+5–50ms, <code>batch.size</code> 64–256KB,
+<code>compression.type=zstd</code>.<br />
+- Limit in-flight: <code>max.in.flight.requests.per.connection=1</code>
+for ordering; higher for throughput with idempotence.</p>
+<hr />
+<h2 id="scenario-unclean-leader-elections-isr-shrink">Scenario: Unclean
+Leader Elections / ISR Shrink</h2>
+<p><strong>Symptoms</strong>: Frequent leadership changes, ISR &lt;
+replication factor, data loss risk.<br />
+<strong>Likely causes</strong>: Broker flaps, slow disks/network,
+under-replicated partitions.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Under-replicated partitions</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-topics.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --describe <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;UnderReplicatedPartitions&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Controller log for elections</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> kafka logs kafka-0 <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;Leader election&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check disk and network on brokers</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">iostat</span> <span class="at">-xz</span> 1 5</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ex">ss</span> <span class="at">-Htn</span> state established <span class="st">&#39;( sport = :9092 )&#39;</span></span></code></pre></div>
+<p>Remediations: - Ensure
+<code>unclean.leader.election.enable=false</code> for critical
+topics.<br />
+- Add brokers or move hot partitions:
+<code>kafka-reassign-partitions.sh ... --generate</code>.<br />
+- Verify broker GC (JVM) and heap sizing; upgrade storage performance if
+needed.</p>
+<hr />
+<h2 id="scenario-schema-registry-serialization-failures">Scenario:
+Schema Registry / Serialization Failures</h2>
+<p><strong>Symptoms</strong>: <code>UnknownMagicByte</code>, schema
+evolution errors, consumer deserialization failures.<br />
+<strong>Likely causes</strong>: Incompatible schema changes, subject
+compatibility mis-set, client not configured for registry.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Subject compatibility</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://schema-registry:8081/config/<span class="op">&lt;</span>subject<span class="op">&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Latest schema</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://schema-registry:8081/subjects/<span class="op">&lt;</span>subject<span class="op">&gt;</span>/versions/latest <span class="kw">|</span> <span class="ex">jq</span> .</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Consumer errors (Avro/JSON schema)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> logs deploy/consumer <span class="at">-c</span> app <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;deserial&quot;</span></span></code></pre></div>
+<p>Remediations: - Enforce <code>BACKWARD</code> or <code>FULL</code>
+compatibility; avoid <code>NONE</code> in prod.<br />
+- Ensure clients set
+<code>value.serializer</code>/<code>key.serializer</code> aligned with
+registry; pin schema IDs if needed for rollbacks.</p>
+<hr />
+<h2 id="scenario-topic-explosion-quota-pressure">Scenario: Topic
+Explosion / Quota Pressure</h2>
+<p><strong>Symptoms</strong>: Controller overload, slow metadata
+responses, storage pressure.<br />
+<strong>Likely causes</strong>: Many tiny topics/partitions, runaway
+tenants, unbounded retention.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Topic and partition counts</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-topics.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --list <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-topics.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --describe <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Per-topic retention</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">kafka-configs.sh</span> <span class="at">--bootstrap-server</span> <span class="op">&lt;</span>broker:9092<span class="op">&gt;</span> --describe <span class="at">--entity-type</span> topics <span class="kw">|</span> <span class="fu">grep</span> retention</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Disk usage per broker</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">du</span> <span class="at">-sh</span> /var/lib/kafka/data/<span class="pp">*</span> <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<p>Remediations: - Cap partitions per broker (rule of thumb: &lt;= 4000
+per broker, adjust by hardware).<br />
+- Apply defaults: <code>retention.ms</code>,
+<code>retention.bytes</code>, and compaction where applicable.<br />
+- Use templates for topic creation; gate via platform API.</p>
+<hr />
+<h2 id="incident-checklist-keep-handy">Incident Checklist (Keep
+Handy)</h2>
+<ul>
+<li>Capture broker/controller logs before restart.<br />
+</li>
+<li>Snapshot metrics: under-replicated partitions, request latency, GC,
+disk I/O.<br />
+</li>
+<li>Validate client versions and configs (acks, retries, idempotence,
+compression).<br />
+</li>
+<li>Confirm network path (MTU, DNS, TLS cert validity).<br />
+</li>
+<li>Ensure <code>auto.create.topics.enable=false</code> in production
+clusters.</li>
+</ul>
+<hr />
+<h2 id="quick-client-sanity-snippet-python-confluent-kafka">Quick Client
+Sanity Snippet (Python, confluent-kafka)</h2>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> confluent_kafka <span class="im">import</span> Producer, Consumer</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>conf <span class="op">=</span> {</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;bootstrap.servers&quot;</span>: <span class="st">&quot;kafka-1:9092,kafka-2:9092&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;enable.idempotence&quot;</span>: <span class="va">True</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;retries&quot;</span>: <span class="dv">5</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;linger.ms&quot;</span>: <span class="dv">20</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;batch.num.messages&quot;</span>: <span class="dv">1000</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>producer <span class="op">=</span> Producer(conf)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>producer.produce(<span class="st">&quot;health&quot;</span>, key<span class="op">=</span><span class="st">&quot;ping&quot;</span>, value<span class="op">=</span><span class="st">&quot;pong&quot;</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>producer.flush(<span class="dv">5</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>consumer <span class="op">=</span> Consumer({</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>conf,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;group.id&quot;</span>: <span class="st">&quot;debug&quot;</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;auto.offset.reset&quot;</span>: <span class="st">&quot;latest&quot;</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>consumer.subscribe([<span class="st">&quot;health&quot;</span>])</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>msg <span class="op">=</span> consumer.poll(<span class="dv">2</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(msg.value())</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>consumer.close()</span></code></pre></div>
+
+                <a href="/index.html" class="back-link">← Back to Home</a>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Highlight.js
+        hljs.highlightAll();
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll('div.sourceCode').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'code-copy';
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', () => {
+                const code = block.querySelector('code');
+                if (!code) return;
+
+                const text = code.innerText.trim();
+                navigator.clipboard?.writeText(text).then(() => {
+                    button.textContent = 'Copied';
+                    setTimeout(() => (button.textContent = 'Copy'), 1800);
+                }).catch(() => {
+                    // Fallback: select text for manual copy
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                });
+            });
+
+            block.appendChild(button);
+        });
+    </script>
+</body>
+</html>
