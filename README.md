@@ -5,10 +5,12 @@
 ![Build Status](https://github.com/atamsekar-tivo/SRESource/workflows/Build%20and%20Push%20Docker%20Image/badge.svg)
 ![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-blue)
 ![Kubernetes](https://img.shields.io/badge/kubernetes-1.20+-blue)
+![Python](https://img.shields.io/badge/python-3.11+-blue)
+![Flask](https://img.shields.io/badge/flask-3.0+-blue)
 
-SRESource is a **self-hosted, production-ready knowledge base** for Site Reliability Engineers, DevOps professionals, and Platform Engineers. It provides comprehensive debugging commands, operational procedures, and best practices across multiple domains.
+SRESource is a **self-hosted, production-ready knowledge base** built on **Flask + Gunicorn** for SRE/DevOps/Platform teams. It renders Markdown/HTML docs dynamically, ships as a container, and is ready for Kubernetes/Helm.
 
-## 📚 Content Coverage
+## Content Coverage
 
 - **Kubernetes** - Debugging, EKS, troubleshooting
 - **Linux/Unix** - System performance, troubleshooting, administration
@@ -20,112 +22,89 @@ SRESource is a **self-hosted, production-ready knowledge base** for Site Reliabi
 
 **Total**: 60+ debugging scenarios | 400+ production-ready commands | ~30,000 lines of content
 
-## 🚀 Quick Start
+##  Getting Started
 
-### Option 1: Docker Compose (Local Development)
+### Local Development (Docker Compose)
 
 ```bash
-# Clone the repository
 git clone https://github.com/atamsekar-tivo/SRESource.git
 cd SRESource
 
-# Start with Docker Compose
 docker-compose up -d
-
-# Access at http://localhost:8080
+# Application at http://localhost:8080
 ```
 
-### Option 2: Kubernetes Deployment
+### Local (Python)
 
 ```bash
-# Using kubectl
+pip install -r requirements.txt
+python app.py            # http://localhost:5000
+```
+
+### Production Deployment (Kubernetes)
+
+**With kubectl:**
+```bash
 kubectl apply -f kubernetes/
-
-# Or using Helm (recommended)
-helm install sresource ./helm/sresource \
-  --values helm/sresource/values.yaml
-
-# Port forward to access
 kubectl port-forward svc/sresource 8080:80
-
 # Access at http://localhost:8080
 ```
 
-### Option 3: Helm Chart
-
+**With Helm (Recommended):**
 ```bash
-# Add to your values
-helm repo add sresource https://charts.example.com
-helm repo update
+helm install sresource ./helm/sresource \
+  --namespace sresource-prod \
+  --create-namespace
 
-# Install with Helm
-helm install sresource sresource/sresource \
-  --set ingress.hosts[0].host=sresource.example.com
+kubectl get svc -n sresource-prod
 ```
 
-## 🐳 Docker Image
+## Docker Image
 
-Pre-built images available:
+The container bundles the Flask app + docs and runs under gunicorn (non-root, port 8080):
 
 ```bash
-# Latest version
-docker pull atamsekar/sresource:latest
+# Build locally
+docker build -t sresource:latest .
 
-# Specific version
-docker pull atamsekar/sresource:v1.0.0
-
-# Run locally
-docker run -p 8080:8080 atamsekar/sresource:latest
+# Run container
+docker run -p 8080:8080 sresource:latest
 ```
 
-Images are automatically built and pushed on every commit to `main` branch.
+**Image Specifications:**
+- **Base:** Python 3.11 Alpine
+- **Server:** Gunicorn (4 workers, 2 threads)
+- **Port:** 8080
+- **Security:** Non-root user (uid: 1000), health checks included
 
-## 📋 Structure
+## Project Structure
 
 ```
 SRESource/
-├── docs/                           # All markdown documentation
-│   ├── index.md                   # Homepage
-│   ├── kubernetes-debugging-commands.md
-│   ├── production-debugging-unix-linux.md
-│   ├── production-networking-debugging.md
-│   ├── production-debugging-ci-cd-tools.md
-│   ├── production-debugging-iam.md
-│   ├── production-debugging-eks.md
-│   ├── TOOLS_GUIDE.md
-│   └── production-debugging-databases.md
-├── kubernetes/                     # K8s manifests
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── ingress.yaml
-│   └── kustomization.yaml
-├── helm/                           # Helm chart
-│   └── sresource/
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       └── templates/
-├── .github/workflows/              # CI/CD automation
-│   └── build-and-push.yml
-├── Dockerfile                      # Multi-stage Docker build
-├── docker-compose.yml              # Local development
-├── mkdocs.yml                      # MkDocs configuration
-└── README.md                       # This file
+├── app.py                    # Flask application (routes + rendering)
+├── templates/                # Jinja2 templates (base/page/404/500)
+├── static/css/style.css      # UI theme (dark mode, responsive)
+├── docs/                     # Markdown/HTML content (served dynamically)
+├── kubernetes/               # K8s manifests
+├── helm/sresource/           # Helm chart
+├── docker-compose.yml        # Local dev (gunicorn)
+├── Dockerfile                # Multi-stage build (gunicorn, non-root)
+├── FLASK_README.md           # Migration quick reference
+├── MIGRATION_GUIDE.md        # mkdocs → Flask deep dive
+├── FLASK_MIGRATION_SUMMARY.md# Summary of changes
+├── FLASK_MIGRATION_CHECKLIST.md# Verification checklist
+└── mkdocs.yml                # Legacy (kept for reference, not used)
 ```
 
-## 🔧 Features
+## Features
 
-- ✅ **Fast Search** - Full-text search across all content
-- ✅ **Dark Mode** - Eye-friendly dark theme
-- ✅ **Code Highlighting** - Syntax highlighting for all code blocks
-- ✅ **Mobile Responsive** - Works on mobile, tablet, desktop
-- ✅ **Auto-generated TOC** - Automatic table of contents
-- ✅ **Git Integration** - Shows last modified date
-- ✅ **Multiple Themes** - Material Design theme
-- ✅ **Low Resource** - ~256MB memory, ~100m CPU per pod
-- ✅ **Highly Available** - Multi-pod deployment with anti-affinity
-- ✅ **Secure** - Non-root user, read-only filesystem, drop all capabilities
+- - Dynamic Flask rendering of docs (Markdown/HTML) with code highlighting
+- - Responsive UI + dark mode (Jinja2 templates + CSS)
+- - Health checks, non-root user, resource limits, HPA-ready
+- - Helm chart + K8s manifests + docker-compose for local dev
+- - Fast startup (no mkdocs build step), gunicorn workers/threads tuned
 
-## 📊 Performance Specs
+## Performance Specs
 
 | Metric | Value |
 |--------|-------|
@@ -138,41 +117,14 @@ SRESource/
 | Startup Time | ~5-10 seconds |
 | Response Time | <100ms (typical) |
 
-## 🛠️ Development
+## Development
 
-### Prerequisites
+- Python 3.11+, Docker/Docker Compose, Kubernetes 1.20+, Helm 3+.  
+- Local dev: `python app.py` (or `FLASK_ENV=development python app.py`) for hot reload.  
+- Container dev: `docker-compose up -d` (gunicorn).  
+- MkDocs is retired; `mkdocs.yml` remains only for historical reference.
 
-- Python 3.11+
-- Docker & Docker Compose
-- Kubernetes 1.20+ (for K8s deployment)
-- Helm 3+ (for Helm chart)
-
-### Local Development
-
-```bash
-# Install Python dependencies
-pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
-
-# Run MkDocs server (live reload)
-mkdocs serve
-
-# Access at http://localhost:8000
-```
-
-### Building Docker Image
-
-```bash
-# Build locally
-docker build -t sresource:local .
-
-# Run
-docker run -p 8080:8080 sresource:local
-
-# Test
-curl http://localhost:8080
-```
-
-## 📝 Contributing
+## Contributing
 
 Contributions are welcome! Please:
 
@@ -196,7 +148,7 @@ cp docs/template.md docs/my-new-guide.md
 
 Changes automatically appear in MkDocs when saved.
 
-## 🚀 Deployment Examples
+##  Deployment Examples
 
 ### Kubernetes with Ingress
 
@@ -246,7 +198,7 @@ helm install sresource ./helm/sresource \
   -f helm/values-dev.yaml
 ```
 
-## 📚 Content Statistics
+## Content Statistics
 
 | Category | Count | Lines |
 |----------|-------|-------|
@@ -260,39 +212,39 @@ helm install sresource ./helm/sresource \
 | Databases | 1 guide | 4,000+ |
 | **Total** | **9 guides** | **~30,000 lines** |
 
-## 🔐 Security
+## Security
 
-- ✅ Non-root user (UID 1000)
-- ✅ Read-only root filesystem
-- ✅ Dropped all capabilities
-- ✅ No privileged container mode
-- ✅ Security scanning in CI/CD (Trivy)
-- ✅ Minimal base image (Alpine Linux)
-- ✅ Health checks configured
-- ✅ Resource limits enforced
+- - Non-root user (UID 1000)
+- - Read-only root filesystem
+- - Dropped all capabilities
+- - No privileged container mode
+- - Security scanning in CI/CD (Trivy)
+- - Minimal base image (Alpine Linux)
+- - Health checks configured
+- - Resource limits enforced
 
-## 📖 Documentation
+## Documentation
 
 - [Official MkDocs Documentation](https://www.mkdocs.org/)
 - [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [Helm Documentation](https://helm.sh/docs/)
 
-## 🐛 Issues & Support
+## Issues & Support
 
 Found a bug? Have a suggestion? [Create an issue](https://github.com/atamsekar-tivo/SRESource/issues)
 
-## 📄 License
+## License
 
 This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License** - see [LICENSE](LICENSE) file for details.
 
-## 👨‍💼 Author
+## Author
 
 **Anirudh Tamsekar**
 - GitHub: [@atamsekar-tivo](https://github.com/atamsekar-tivo)
 - Email: atamsekar@example.com
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [MkDocs](https://www.mkdocs.org/) - Static site generator
 - [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) - Beautiful theme
@@ -301,6 +253,4 @@ This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0
 
 ---
 
-**Made with ❤️ for the SRE/DevOps community**
-
-⭐ If you find this useful, please star the repository!
+If you find this useful, please star the repository.
