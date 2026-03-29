@@ -3,7 +3,7 @@
 {% block title %}{{ title }} - SRESource{% endblock %}
 
 {% block content %}
-    {% if is_html %}
+    {% if is_html is defined and is_html %}
         <div class="html-content">
             {{ content | safe }}
         </div>
