@@ -142,6 +142,41 @@ NAV_STRUCTURE = {
                 "file": "root-cause-analysis.html",
                 "path": "/tools/rca",
             },
+            "interview_playbook": {
+                "title": "SRE Interview Playbook (Advanced)",
+                "file": "SRE_INTERVIEW_PLAYBOOK_2026.md",
+                "path": "/tools/interview-playbook",
+            },
+            "platform_patterns": {
+                "title": "Platform Engineering Patterns (2026)",
+                "file": "PLATFORM_ENGINEERING_PATTERNS_2026.md",
+                "path": "/tools/platform-patterns",
+            },
+            "prep_tracks": {
+                "title": "Interview Prep Tracks (15/30/60 Days)",
+                "file": "INTERVIEW_PREP_TRACKS_2026.md",
+                "path": "/tools/prep-tracks",
+            },
+            "mock_bank": {
+                "title": "Mock Interview Question Bank",
+                "file": "MOCK_INTERVIEW_BANK_2026.md",
+                "path": "/tools/mock-interview-bank",
+            },
+            "cheatsheets": {
+                "title": "SRE Cheat Sheets (Rapid Revision)",
+                "file": "SRE_CHEATSHEETS_2026.md",
+                "path": "/tools/cheatsheets",
+            },
+            "books": {
+                "title": "Recommended Books (Best Picks)",
+                "file": "RECOMMENDED_BOOKS_TECH_INTERVIEWS_2026.md",
+                "path": "/tools/recommended-books",
+            },
+            "top50": {
+                "title": "Top 50 Interview Questions + Answers",
+                "file": "TOP_50_SRE_INTERVIEW_QA_2026.md",
+                "path": "/tools/top-50-questions",
+            },
         },
     },
 }
@@ -183,6 +218,27 @@ ROUTE_INDEX = {item["file"]: item["path"] for item in get_all_routes() if item.g
 PATH_INDEX = {item["path"]: item for item in get_all_routes() if item.get("file")}
 
 
+def clean_ui_symbols(text):
+    """Replace emoji-style markers with professional text labels."""
+    replacements = {
+        "✅": "[Recommended]",
+        "❌": "[Do Not]",
+        "⚠️": "[Caution]",
+        "⚠": "[Caution]",
+        "🚀": "[Deploy]",
+        "📋": "[Checklist]",
+        "📚": "[Docs]",
+        "🔧": "[Setup]",
+        "🎉": "[Done]",
+        "🐳": "[Docker]",
+        "☸️": "[Kubernetes]",
+        "☸": "[Kubernetes]",
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return text
+
+
 def read_markdown_file(filename):
     """Read and parse markdown file"""
     file_path = app.config["DOCS_DIR"] / filename
@@ -194,6 +250,7 @@ def read_markdown_file(filename):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
+        content = clean_ui_symbols(content)
     except OSError:
         app.logger.exception("Error reading markdown file %s", file_path)
         return None, None
@@ -233,10 +290,23 @@ def read_html_file(filename):
     except OSError:
         app.logger.exception("Error reading HTML file %s", file_path)
         return None, None
-    
-    # Extract title from HTML title tag
-    title_match = re.search(r"<title>(.+?)</title>", content)
-    title = title_match.group(1) if title_match else filename
+
+    title_match = re.search(r"<title>(.+?)</title>", content, flags=re.IGNORECASE | re.DOTALL)
+    title = title_match.group(1).strip() if title_match else filename
+
+    # Normalize full HTML documents so internal pages share one visual standard.
+    body_match = re.search(r"<body[^>]*>(.*?)</body>", content, flags=re.IGNORECASE | re.DOTALL)
+    if body_match:
+        content = body_match.group(1)
+    content = clean_ui_symbols(content)
+    content = re.sub(r"<script\b[^>]*>.*?</script>", "", content, flags=re.IGNORECASE | re.DOTALL)
+    content = re.sub(r"<style\b[^>]*>.*?</style>", "", content, flags=re.IGNORECASE | re.DOTALL)
+    content = re.sub(
+        r"<link\b[^>]*rel=[\"']stylesheet[\"'][^>]*>",
+        "",
+        content,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
     
     return Markup(content), title
 

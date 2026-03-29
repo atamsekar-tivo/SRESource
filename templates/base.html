@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SRESource - Production Debugging & Operations{% endblock %}</title>
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/sresource-logo.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
@@ -15,14 +17,16 @@
         <header class="site-header">
             <div class="header-content">
                 <a href="/" class="logo">
-                    <svg width="32" height="32" viewBox="0 0 32 32" class="logo-icon">
-                        <rect x="4" y="4" width="24" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
-                        <path d="M10 10h12M10 16h12M10 22h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <span class="logo-text">SRESource</span>
+                    <img src="{{ url_for('static', filename='img/sresource-logo.svg') }}" alt="SRESource logo" class="logo-mark">
+                    <div class="logo-copy">
+                        <span class="logo-text">SRESource</span>
+                        <span class="logo-subtitle">Production Engineering Playbooks</span>
+                    </div>
                 </a>
                 <nav class="main-nav">
-                    <button class="nav-toggle" onclick="toggleSidebar()">☰</button>
+                    <input id="nav-search" class="nav-search" type="search" placeholder="Search topics..." aria-label="Search navigation">
+                    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">Dark</button>
+                    <button class="nav-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation">Menu</button>
                 </nav>
             </div>
         </header>
@@ -37,14 +41,14 @@
                                 <ul class="nav-list">
                                     {% for child_key, child_item in item.children.items() %}
                                         <li class="nav-item">
-                                            <a href="{{ child_item.path }}" class="nav-link">{{ child_item.title }}</a>
+                                            <a href="{{ child_item.path }}" class="nav-link{% if request.path == child_item.path %} active{% endif %}">{{ child_item.title }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
                             </div>
                         {% elif item.path != '/' %}
                             <div class="nav-section">
-                                <a href="{{ item.path }}" class="nav-link nav-top-level">{{ item.title }}</a>
+                                <a href="{{ item.path }}" class="nav-link nav-top-level{% if request.path == item.path %} active{% endif %}">{{ item.title }}</a>
                             </div>
                         {% endif %}
                     {% endfor %}
@@ -56,6 +60,9 @@
             </aside>
 
             <main class="main-content">
+                <section class="global-disclaimer" role="note" aria-label="Important usage disclaimer">
+                    <strong>Important Disclaimer:</strong> Some commands, checklists, and do/don't guidance in this knowledge base are AI-generated. Review, validate, and test in a safe environment before using anything in production.
+                </section>
                 {% if breadcrumbs %}
                     <div class="breadcrumbs">
                         {% for crumb in breadcrumbs %}
@@ -75,6 +82,9 @@
 
                 <footer class="content-footer">
                     <p>SRESource — Comprehensive production debugging and operations guide for SRE/DevOps/Platform Engineers</p>
+                    <p class="footer-disclaimer">
+                        Note: Some commands and guidance are AI-generated. Validate and test before production use.
+                    </p>
                     <p class="footer-meta">
                         <a href="https://github.com/atamsekar-tivo/SRESource" target="_blank">GitHub</a> •
                         <a href="https://github.com/atamsekar-tivo/SRESource/blob/main/LICENSE" target="_blank">CC-BY-SA 4.0</a> •
@@ -86,6 +96,26 @@
     </div>
 
     <script>
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            const toggle = document.getElementById('theme-toggle');
+            const lightTheme = document.getElementById('hljs-light');
+            const darkTheme = document.getElementById('hljs-dark');
+            root.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (toggle) {
+                toggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
+            }
+            if (lightTheme && darkTheme) {
+                lightTheme.disabled = theme === 'dark';
+                darkTheme.disabled = theme !== 'dark';
+            }
+        }
+
+        const storedTheme = localStorage.getItem('theme');
+        const initialTheme = storedTheme === 'dark' ? 'dark' : 'light';
+        applyTheme(initialTheme);
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');
@@ -102,6 +132,25 @@
         document.querySelectorAll('pre code').forEach(block => {
             hljs.highlightElement(block);
         });
+
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                applyTheme(current === 'light' ? 'dark' : 'light');
+            });
+        }
+
+        const navSearch = document.getElementById('nav-search');
+        if (navSearch) {
+            navSearch.addEventListener('input', (event) => {
+                const query = event.target.value.toLowerCase().trim();
+                document.querySelectorAll('.nav-item, .nav-section .nav-top-level').forEach((item) => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(query) ? '' : 'none';
+                });
+            });
+        }
 
         // Set last updated time
         document.getElementById('last-updated').textContent = new Date().toLocaleDateString();

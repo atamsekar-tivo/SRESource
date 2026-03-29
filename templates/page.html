@@ -3,6 +3,17 @@
 {% block title %}{{ title }} - SRESource{% endblock %}
 
 {% block content %}
+    <header class="doc-header">
+        <p class="doc-kicker">{% if request.path == '/' %}Main Guide{% else %}Knowledge Base{% endif %}</p>
+        <h1 class="doc-title">{{ title }}</h1>
+        <p class="doc-subtitle">
+            {% if request.path == '/' %}
+            Practical production debugging, platform engineering patterns, and interview-focused reliability guidance.
+            {% else %}
+            Standardized learning content with production-ready commands, patterns, and implementation notes.
+            {% endif %}
+        </p>
+    </header>
     {% if is_html is defined and is_html %}
         <div class="html-content">
             {{ content | safe }}

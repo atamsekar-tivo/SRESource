@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">SRESource Logo</title>
+  <desc id="desc">Shield with pulse and command prompt</desc>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5ba3ff"/>
+      <stop offset="100%" stop-color="#2f6fe4"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="80" height="80" rx="20" fill="#0e1a33"/>
+  <rect x="12" y="12" width="72" height="72" rx="16" fill="none" stroke="url(#g)" stroke-width="4"/>
+  <path d="M24 52h12l6-12 8 20 8-12h14" fill="none" stroke="#8bc2ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M27 30l7 6-7 6" fill="none" stroke="#5ba3ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="39" y1="42" x2="52" y2="42" stroke="#5ba3ff" stroke-width="4" stroke-linecap="round"/>
+</svg>
