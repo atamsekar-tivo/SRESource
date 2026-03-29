@@ -20,7 +20,7 @@ services:
     networks:
       - sresource
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/', timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3
