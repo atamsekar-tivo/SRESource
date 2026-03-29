@@ -1,5 +1,5 @@
 # Multi-stage build for SRESource Flask application
-FROM python:3.11-alpine as builder
+FROM python:3.11-alpine AS builder
 
 WORKDIR /tmp
 
@@ -7,11 +7,9 @@ WORKDIR /tmp
 RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev
 
 # Install Python dependencies
-RUN pip install --user --no-cache-dir \
-    Flask==3.0.0 \
-    Markdown==3.5.1 \
-    Werkzeug==3.0.0 \
-    gunicorn==21.2.0
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --user --no-cache-dir -r requirements.txt
 
 # Production stage
 FROM python:3.11-alpine
@@ -20,7 +18,6 @@ WORKDIR /app
 
 # Install runtime dependencies only
 RUN apk add --no-cache \
-    curl \
     libffi \
     openssl
 
@@ -35,17 +32,21 @@ RUN addgroup -g 1000 flask && \
 
 # Set PATH to include local Python packages
 ENV PATH=/home/flask/.local/bin:$PATH \
-    PYTHONUNBUFFERED=1 \
-    FLASK_APP=app.py
+    PYTHONUNBUFFERED=1
 
 # Copy application files
 COPY app.py .
+COPY gunicorn_config.py .
+COPY requirements.txt .
 COPY templates/ ./templates/
 COPY static/ ./static/
 COPY docs/ ./docs/
 
-# Create static directory if it doesn't exist
-RUN mkdir -p /app/static
+# Create static directory if it doesn't exist and ensure proper permissions
+RUN mkdir -p /app/static && \
+    chmod -R 755 /app/docs && \
+    chmod -R 755 /app/templates && \
+    chmod -R 755 /app/static
 
 USER flask
 
@@ -54,7 +55,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl --fail http://localhost:8080/ || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/', timeout=3)" || exit 1
 
 # Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--threads", "2", "--worker-class", "gthread", "--timeout", "30", "app:app"]
+CMD ["gunicorn", "--config", "gunicorn_config.py", "app:app"]

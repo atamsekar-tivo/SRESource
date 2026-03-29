@@ -70,13 +70,7 @@
                 {% endif %}
 
                 <article class="content">
-                    {% block content %}
-                        {% if is_html %}
-                            {{ content | safe }}
-                        {% else %}
-                            {{ content }}
-                        {% endif %}
-                    {% endblock %}
+                    {% block content %}{% endblock %}
                 </article>
 
                 <footer class="content-footer">

@@ -38,7 +38,7 @@ docker-compose up -d
 
 ```bash
 pip install -r requirements.txt
-python app.py            # http://localhost:5000
+python app.py            # http://localhost:8080
 ```
 
 ### Production Deployment (Kubernetes)
@@ -146,7 +146,7 @@ vim docs/kubernetes-debugging-commands.md
 cp docs/template.md docs/my-new-guide.md
 ```
 
-Changes automatically appear in MkDocs when saved.
+Changes are rendered dynamically by Flask on page refresh.
 
 ##  Deployment Examples
 
@@ -225,8 +225,8 @@ helm install sresource ./helm/sresource \
 
 ## Documentation
 
-- [Official MkDocs Documentation](https://www.mkdocs.org/)
-- [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [Gunicorn Documentation](https://docs.gunicorn.org/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [Helm Documentation](https://helm.sh/docs/)
 
@@ -246,8 +246,8 @@ This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0
 
 ## Acknowledgments
 
-- [MkDocs](https://www.mkdocs.org/) - Static site generator
-- [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) - Beautiful theme
+- [Flask](https://flask.palletsprojects.com/) - Web framework
+- [Gunicorn](https://docs.gunicorn.org/) - Production WSGI server
 - [Kubernetes](https://kubernetes.io/) - Orchestration platform
 - [Helm](https://helm.sh/) - Kubernetes package manager
 
